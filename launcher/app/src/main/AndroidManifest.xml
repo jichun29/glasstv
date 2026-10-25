@@ -151,6 +151,15 @@
             android:noHistory="true"
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
 
+        <!-- 翻页时钟屏保（2026-10-25 K）：ClockActivity 按设置转发过来，整屏自己排。 -->
+        <activity
+            android:name=".FlipClockActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
+
         <!-- Screensaver: pick it in Settings, or `settings put secure screensaver_components
              com.glasstv.tvhome/.ClockDream` over adb. -->
         <service

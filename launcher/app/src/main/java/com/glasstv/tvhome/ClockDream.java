@@ -9,6 +9,7 @@ import android.service.dreams.DreamService;
 public class ClockDream extends DreamService {
 
     private ClockScene scene;
+    private FlipScene flip;
 
     @Override
     public void onAttachedToWindow() {
@@ -16,6 +17,18 @@ public class ClockDream extends DreamService {
         setInteractive(false);   // any key wakes the TV back to where it was
         setFullscreen(true);
         setScreenBright(false);
+
+        // 翻页时钟（2026-10-25 K）：四块翻页牌 + 天气地区 + 年月日，和 Home 进来的那个同一套画面。
+        String style = getSharedPreferences(Config.SETTINGS_NAME, MODE_PRIVATE)
+                .getString("screensaver_style", "clock");
+        if ("flip".equals(style)) {
+            setContentView(R.layout.dream_flip);
+            flip = new FlipScene(this, getWindow().getDecorView());
+            Weather.init(this, now -> {
+                if (flip != null) flip.setWeather(now);
+            });
+            return;
+        }
         setContentView(R.layout.dream_clock);
         scene = new ClockScene(getWindow().getDecorView());
     }
@@ -23,18 +36,21 @@ public class ClockDream extends DreamService {
     @Override
     public void onDreamingStarted() {
         super.onDreamingStarted();
-        scene.start();
+        if (flip != null) flip.start();
+        else if (scene != null) scene.start();
     }
 
     @Override
     public void onDreamingStopped() {
-        scene.stop();
+        if (flip != null) flip.stop();
+        else if (scene != null) scene.stop();
         super.onDreamingStopped();
     }
 
     @Override
     public void onDetachedFromWindow() {
         if (scene != null) scene.stop();
+        if (flip != null) { flip.stop(); flip = null; }
         super.onDetachedFromWindow();
     }
 }

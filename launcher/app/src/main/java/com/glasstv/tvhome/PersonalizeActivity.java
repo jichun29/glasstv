@@ -64,8 +64,10 @@ public final class PersonalizeActivity extends Activity {
     private TextView saverStatus;     // 屏保页底部状态行
 
     private FrameLayout saverClock;
+    private FrameLayout saverFlip;
     private FrameLayout saverBing;
     private TextView clockCaption;
+    private TextView flipCaption;
     private TextView bingCaption;
     private ImageView bingThumb;
     private TextView bingPlaceholder;
@@ -113,9 +115,12 @@ public final class PersonalizeActivity extends Activity {
         status = findViewById(R.id.pzStatus);
         saverStatus = findViewById(R.id.pzSaverStatus);
         saverClock = findViewById(R.id.pzSaverClock);
+        saverFlip = findViewById(R.id.pzSaverFlip);
         saverBing = findViewById(R.id.pzSaverBing);
         clockCaption = findViewById(R.id.pzClockCaption);
+        flipCaption = findViewById(R.id.pzFlipCaption);
         bingCaption = findViewById(R.id.pzBingCaption);
+        buildFlipPreview();
         bingThumb = findViewById(R.id.pzBingThumb);
         bingPlaceholder = findViewById(R.id.pzBingPlaceholder);
         intervalLabel = findViewById(R.id.pzIntervalLabel);
@@ -177,9 +182,13 @@ public final class PersonalizeActivity extends Activity {
         tabWallpaperLine.setVisibility(showWallpaper ? View.VISIBLE : View.INVISIBLE);
         tabSaverLine.setVisibility(showWallpaper ? View.INVISIBLE : View.VISIBLE);
 
-        if (!focusContent) return;
-        if (showWallpaper) focusFirstGridTile();
-        else saverClock.requestFocus();
+        if (showWallpaper) {
+            status.setText("方向键选壁纸，确定应用");
+            if (focusContent) focusFirstGridTile();
+        } else {
+            saverStatus.setText("方向键挑选屏保样式，确定生效");
+            if (focusContent) saverClock.requestFocus();
+        }
     }
 
     // ---- 壁纸：状态 + 网格 -------------------------------------------------------
@@ -450,6 +459,7 @@ public final class PersonalizeActivity extends Activity {
 
         if (BuildConfig.LITE) bingPill.setVisibility(View.GONE);
         status.setText("方向键选壁纸，确定应用");
+        saverStatus.setText("方向键挑选屏保样式，确定生效");
     }
 
     private void focusFirstGridTile() {
@@ -501,6 +511,7 @@ public final class PersonalizeActivity extends Activity {
 
     private void wireSaverPage() {
         saverClock.setOnClickListener(v -> setSaverStyle("clock"));
+        saverFlip.setOnClickListener(v -> setSaverStyle("flip"));
         saverBing.setOnClickListener(v -> setSaverStyle("bing"));
 
         idlePill.setOnClickListener(v -> {
@@ -523,11 +534,15 @@ public final class PersonalizeActivity extends Activity {
         saverClock.setOnFocusChangeListener((v, f) -> {
             if (f) saverStatus.setText("时间屏保：大号时钟，不联网也一直有");
         });
+        saverFlip.setOnFocusChangeListener((v, f) -> {
+            if (f) saverStatus.setText("翻页时钟：两块大翻页牌 + 天气地区 + 年月日周几");
+        });
         saverBing.setOnFocusChangeListener((v, f) -> {
             if (f) saverStatus.setText("必应壁纸屏保：每天一张新风景，需要联网");
         });
-        saverClock.setOnKeyListener((v, key, event) -> saverKeys(key, event, true));
-        saverBing.setOnKeyListener((v, key, event) -> saverKeys(key, event, false));
+        saverClock.setOnKeyListener((v, key, event) -> saverKeys(key, event, 0));
+        saverFlip.setOnKeyListener((v, key, event) -> saverKeys(key, event, 1));
+        saverBing.setOnKeyListener((v, key, event) -> saverKeys(key, event, 2));
 
         for (int i = 0; i < segments.length; i++) {
             final int minutes = INTERVAL_MINS[i];
@@ -565,7 +580,7 @@ public final class PersonalizeActivity extends Activity {
         });
         nextImage.setOnKeyListener((v, key, event) -> bottomKeys(key, event, false));
 
-        previewButton.setOnClickListener(v -> startActivity(new Intent(this, ClockActivity.class)));
+        previewButton.setOnClickListener(v -> startActivity(ClockActivity.launch(this)));
         previewButton.setOnFocusChangeListener((v, f) -> {
             ((TextView) previewButton).setTextColor(f ? 0xFF14171C : 0xFFFFFFFF);
             if (f) saverStatus.setText("按确定立即预览，任意键返回");
@@ -573,7 +588,8 @@ public final class PersonalizeActivity extends Activity {
         previewButton.setOnKeyListener((v, key, event) -> bottomKeys(key, event, true));
     }
 
-    private boolean saverKeys(int key, KeyEvent event, boolean first) {
+    /** at: 0=时间 1=翻页 2=必应；三张卡横排，左右只在卡之间走，到边界吃掉。 */
+    private boolean saverKeys(int key, KeyEvent event, int at) {
         if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
         if (key == KeyEvent.KEYCODE_DPAD_UP) { tabSaver.requestFocus(); return true; }
         if (key == KeyEvent.KEYCODE_DPAD_DOWN) {
@@ -582,13 +598,13 @@ public final class PersonalizeActivity extends Activity {
             else previewButton.requestFocus();
             return true;
         }
+        FrameLayout[] cards = {saverClock, saverFlip, saverBing};
         if (key == KeyEvent.KEYCODE_DPAD_RIGHT) {
-            if (first) saverBing.requestFocus();
-            else previewButton.requestFocus();
+            if (at < cards.length - 1) cards[at + 1].requestFocus();
             return true;
         }
         if (key == KeyEvent.KEYCODE_DPAD_LEFT) {
-            if (!first) { saverClock.requestFocus(); return true; }
+            if (at > 0) cards[at - 1].requestFocus();
             return true;   // 最左：吃掉，不跨回壁纸页
         }
         return false;
@@ -621,6 +637,12 @@ public final class PersonalizeActivity extends Activity {
     }
 
     private void setSaverStyle(String style) {
+        if ("flip".equals(style)) {
+            choices.edit().putString("screensaver_style", "flip").apply();
+            refreshScreensaver();
+            setResult(RESULT_OK);
+            return;
+        }
         if ("bing".equals(style)) {
             if (BuildConfig.LITE) {
                 Toast.makeText(this, "4.4 精简版不支持壁纸屏保", Toast.LENGTH_SHORT).show();
@@ -637,14 +659,18 @@ public final class PersonalizeActivity extends Activity {
 
     private void refreshScreensaver() {
         boolean enabled = choices.getBoolean("idle_clock_enabled", true);
-        boolean bing = "bing".equals(choices.getString("screensaver_style", "clock")) && !BuildConfig.LITE;
+        String style = choices.getString("screensaver_style", "clock");
+        boolean bing = "bing".equals(style) && !BuildConfig.LITE;
+        boolean flip = "flip".equals(style);
 
         idlePill.setText(enabled ? "屏保：开" : "屏保：关");
         idlePill.setSelected(enabled);
-        clockCaption.setText(bing ? "时间" : "时间  ✓");
+        clockCaption.setText(flip || bing ? "时间" : "时间  ✓");
+        flipCaption.setText(flip ? "翻页时钟  ✓" : "翻页时钟");
         bingCaption.setText(bing ? "必应每日  ✓" : "必应每日");
         TextView mode = findViewById(R.id.pzSaverMode);
-        if (mode != null) mode.setText(bing ? "当前：必应壁纸屏保" : "当前：时间屏保");
+        if (mode != null) mode.setText(bing ? "当前：必应壁纸屏保"
+                : flip ? "当前：翻页时钟屏保" : "当前：时间屏保");
 
         int visibility = (bing && enabled) ? View.VISIBLE : View.GONE;
         intervalLabel.setVisibility(visibility);
@@ -656,6 +682,22 @@ public final class PersonalizeActivity extends Activity {
             boolean selected = current == INTERVAL_MINS[i];
             segments[i].setSelected(selected);
             ((TextView) segments[i]).setTextColor(selected ? 0xFF14171C : 0xFFFFFFFF);
+        }
+    }
+
+    /** 屏保页「翻页时钟」卡里的静态预览：两块小牌子 09 / 41，跟实物同一套画法。 */
+    private void buildFlipPreview() {
+        LinearLayout row = findViewById(R.id.pzFlipPreview);
+        if (row == null || row.getChildCount() > 0) return;
+        int w = Math.round(dp(80)), h = Math.round(dp(68));
+        int text = Math.round(dp(57));
+        String[] values = {"09", "41"};
+        for (int i = 0; i < values.length; i++) {
+            FlipCard card = new FlipCard(this, w, h, text);
+            card.setValue(values[i], false);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(w, h);
+            if (i == 0) lp.rightMargin = Math.round(dp(7));
+            row.addView(card, lp);
         }
     }
 

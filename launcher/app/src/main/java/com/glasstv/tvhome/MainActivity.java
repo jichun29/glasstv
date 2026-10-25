@@ -116,7 +116,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener, T
     private long idleClockMs;
     /** 时间屏保默认闲置分钟数（config.xml 没配 home_idle_clock_minutes 时用）。 */
     private static final int DEFAULT_IDLE_CLOCK_MINUTES = 5;
-    private final Runnable showIdleClock = () -> startActivity(new Intent(this, ClockActivity.class));
+    private final Runnable showIdleClock = () -> startActivity(ClockActivity.launch(this));
     private String liveTvAction;
     private String inputAction;
     private String sourcePanelService;
@@ -1355,7 +1355,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener, T
             scrollToTopClean();
             return;
         }
-        startActivity(new Intent(this, ClockActivity.class));
+        startActivity(ClockActivity.launch(this));
     }
 
     /** 有我们自己的弹窗/面板开着时为 true：这时返回键应该先关它，不该进屏保。 */

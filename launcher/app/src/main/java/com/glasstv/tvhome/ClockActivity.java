@@ -1,6 +1,7 @@
 package com.glasstv.tvhome;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -20,6 +21,16 @@ import java.io.File;
  */
 public class ClockActivity extends Activity {
 
+    /**
+     * 按当前屏保样式返回该进的页面：翻页时钟 → FlipClockActivity，其余（时间 / 必应壁纸）→ 自己。
+     * 调用方统一走这个，避免先起细字时钟再转发导致闪一下黑屏。
+     */
+    static Intent launch(android.content.Context context) {
+        String style = context.getSharedPreferences(Config.SETTINGS_NAME, android.content.Context.MODE_PRIVATE)
+                .getString("screensaver_style", "clock");
+        return new Intent(context, "flip".equals(style) ? FlipClockActivity.class : ClockActivity.class);
+    }
+
     private ClockScene scene;
     private boolean alive = true;
 
@@ -33,6 +44,12 @@ public class ClockActivity extends Activity {
 
         String style = getSharedPreferences(Config.SETTINGS_NAME, MODE_PRIVATE)
                 .getString("screensaver_style", "clock");
+        if ("flip".equals(style)) {
+            // 翻页时钟是整屏自己排的，交给 FlipClockActivity，这里直接收摊
+            startActivity(new Intent(this, FlipClockActivity.class));
+            finish();
+            return;
+        }
         if (!"bing".equals(style) || BuildConfig.LITE) return;
 
         final Point size = screenSize();

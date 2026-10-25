@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 翻页时钟屏保（2026-10-25 K 定稿样式）：照爆款 Fliqlo ——
+     两块大牌子（小时 / 分钟）并排居中、无冒号、无外层衬板，下方天气+地区、年月日+周几。
+     牌子在代码里生成（FlipCard），这里只放容器和两行信息。 -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/flipRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FF000000">
+
+    <LinearLayout
+        android:id="@+id/flipContent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+
+        <LinearLayout
+            android:id="@+id/flipRow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical" />
+
+        <TextView
+            android:id="@+id/flipWeather"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="44dp"
+            android:singleLine="true"
+            android:textColor="#CCFFFFFF"
+            android:textSize="27sp"
+            android:letterSpacing="0.06"
+            android:includeFontPadding="false" />
+
+        <TextView
+            android:id="@+id/flipDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:singleLine="true"
+            android:textColor="#94FFFFFF"
+            android:textSize="20sp"
+            android:letterSpacing="0.08"
+            android:includeFontPadding="false" />
+    </LinearLayout>
+</FrameLayout>

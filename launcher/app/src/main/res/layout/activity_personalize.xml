@@ -226,19 +226,18 @@
         <!-- 卡片一：时间 -->
         <FrameLayout
             android:id="@+id/pzSaverClock"
-            android:layout_width="300dp"
-            android:layout_height="196dp"
-            android:layout_marginStart="48dp"
-            android:layout_marginTop="196dp"
+            android:layout_width="272dp"
+            android:layout_height="186dp"
+            android:layout_marginStart="38dp"
+            android:layout_marginTop="192dp"
             android:focusable="true"
             android:clickable="true"
             android:background="@drawable/saver_card"
-            android:padding="6dp"
-            android:clipChildren="false">
+            android:padding="6dp">
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="152dp"
+                android:layout_height="142dp"
                 android:background="@drawable/saver_card_preview">
 
                 <TextClock
@@ -248,7 +247,7 @@
                     android:format12Hour="HH:mm"
                     android:format24Hour="HH:mm"
                     android:textColor="#F2FFFFFF"
-                    android:textSize="54sp"
+                    android:textSize="50sp"
                     android:fontFamily="@font/outfit_extralight"
                     android:includeFontPadding="false" />
             </FrameLayout>
@@ -265,22 +264,59 @@
                 android:fontFamily="@font/outfit_regular" />
         </FrameLayout>
 
-        <!-- 卡片二：必应壁纸 -->
+        <!-- 卡片二：翻页时钟（2026-10-25 K）。预览图里两块小牌子在代码里生成。 -->
         <FrameLayout
-            android:id="@+id/pzSaverBing"
-            android:layout_width="300dp"
-            android:layout_height="196dp"
-            android:layout_marginStart="368dp"
-            android:layout_marginTop="196dp"
+            android:id="@+id/pzSaverFlip"
+            android:layout_width="272dp"
+            android:layout_height="186dp"
+            android:layout_marginStart="334dp"
+            android:layout_marginTop="192dp"
             android:focusable="true"
             android:clickable="true"
             android:background="@drawable/saver_card"
-            android:padding="6dp"
-            android:clipChildren="false">
+            android:padding="6dp">
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="152dp"
+                android:layout_height="142dp"
+                android:background="@drawable/saver_card_preview">
+
+                <LinearLayout
+                    android:id="@+id/pzFlipPreview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/pzFlipCaption"
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                android:layout_gravity="bottom"
+                android:gravity="center"
+                android:text="翻页时钟"
+                android:textColor="#E6FFFFFF"
+                android:textSize="15sp"
+                android:fontFamily="@font/outfit_regular" />
+        </FrameLayout>
+
+        <!-- 卡片三：必应壁纸 -->
+        <FrameLayout
+            android:id="@+id/pzSaverBing"
+            android:layout_width="272dp"
+            android:layout_height="186dp"
+            android:layout_marginStart="630dp"
+            android:layout_marginTop="192dp"
+            android:focusable="true"
+            android:clickable="true"
+            android:background="@drawable/saver_card"
+            android:padding="6dp">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="142dp"
                 android:background="@drawable/saver_card_preview">
 
                 <ImageView
@@ -306,7 +342,7 @@
                 android:layout_height="32dp"
                 android:layout_gravity="bottom"
                 android:gravity="center"
-                android:text="必应每日壁纸"
+                android:text="必应每日"
                 android:textColor="#E6FFFFFF"
                 android:textSize="15sp"
                 android:fontFamily="@font/outfit_regular" />
@@ -318,7 +354,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="48dp"
-            android:layout_marginTop="412dp"
+            android:layout_marginTop="398dp"
             android:text="换图间隔"
             android:textColor="#66FFFFFF"
             android:textSize="12sp"
@@ -330,7 +366,7 @@
             android:layout_width="96dp"
             android:layout_height="38dp"
             android:layout_marginStart="48dp"
-            android:layout_marginTop="434dp"
+            android:layout_marginTop="420dp"
             android:gravity="center"
             android:focusable="true"
             android:clickable="true"
@@ -345,7 +381,7 @@
             android:layout_width="96dp"
             android:layout_height="38dp"
             android:layout_marginStart="152dp"
-            android:layout_marginTop="434dp"
+            android:layout_marginTop="420dp"
             android:gravity="center"
             android:focusable="true"
             android:clickable="true"
@@ -360,7 +396,7 @@
             android:layout_width="96dp"
             android:layout_height="38dp"
             android:layout_marginStart="256dp"
-            android:layout_marginTop="434dp"
+            android:layout_marginTop="420dp"
             android:gravity="center"
             android:focusable="true"
             android:clickable="true"
@@ -375,7 +411,7 @@
             android:layout_width="168dp"
             android:layout_height="38dp"
             android:layout_marginStart="368dp"
-            android:layout_marginTop="434dp"
+            android:layout_marginTop="420dp"
             android:gravity="center"
             android:focusable="true"
             android:clickable="true"
@@ -388,10 +424,10 @@
 
         <TextView
             android:id="@+id/pzPreviewSaver"
-            android:layout_width="168dp"
+            android:layout_width="176dp"
             android:layout_height="42dp"
-            android:layout_marginStart="760dp"
-            android:layout_marginTop="196dp"
+            android:layout_marginStart="600dp"
+            android:layout_marginTop="418dp"
             android:gravity="center"
             android:focusable="true"
             android:clickable="true"
@@ -403,21 +439,21 @@
 
         <TextView
             android:id="@+id/pzSaverHint"
-            android:layout_width="380dp"
+            android:layout_width="148dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="760dp"
-            android:layout_marginTop="252dp"
-            android:lineSpacingExtra="4dp"
-            android:text="预览后按遥控器\n任意键退出"
+            android:layout_marginStart="792dp"
+            android:layout_marginTop="424dp"
+            android:lineSpacingExtra="3dp"
+            android:text="任意键\n退出预览"
             android:textColor="#4DFFFFFF"
             android:textSize="12sp" />
 
         <TextView
             android:id="@+id/pzSaverStatus"
-            android:layout_width="700dp"
+            android:layout_width="800dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="48dp"
-            android:layout_marginTop="486dp"
+            android:layout_marginTop="482dp"
             android:singleLine="true"
             android:ellipsize="end"
             android:textColor="#80FFFFFF"

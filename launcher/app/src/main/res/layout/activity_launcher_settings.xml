@@ -70,42 +70,6 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- ========== 组 2：外观（壁纸 / 屏保，各自独立页） ========== -->
-        <TextView
-            style="@style/SettingsGroupTitle"
-            android:layout_marginTop="32dp"
-            android:text="外观" />
-
-        <LinearLayout style="@style/SettingsRowV2"
-            android:id="@+id/wallpaperEntry"
-            android:layout_marginTop="12dp">
-            <TextView style="@style/SettingsRowLabel"
-                android:text="壁纸" />
-            <TextView android:id="@+id/wallpaperEntryValue" style="@style/SettingsRowValue"
-                android:text="@string/wallpaper_theme_default" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="›"
-                android:textColor="#66FFFFFF"
-                android:textSize="24sp" />
-        </LinearLayout>
-
-        <LinearLayout style="@style/SettingsRowV2"
-            android:id="@+id/screensaverEntry"
-            android:layout_marginTop="10dp">
-            <TextView style="@style/SettingsRowLabel"
-                android:text="屏保" />
-            <TextView android:id="@+id/screensaverEntryValue" style="@style/SettingsRowValue"
-                android:text="时间 · 开" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="›"
-                android:textColor="#66FFFFFF"
-                android:textSize="24sp" />
-        </LinearLayout>
-
         <!-- ========== 组 2.5：时间与天气（2026-10-25 合并二开版） ========== -->
         <TextView
             style="@style/SettingsGroupTitle"

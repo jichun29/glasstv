@@ -3,6 +3,7 @@ package com.glasstv.tvhome;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -173,6 +174,32 @@ final class WallpaperController {
         return thumbnails[n];
     }
 
+    // ---- 「壁纸与屏保」页用的静态访问器（PersonalizeActivity，2026-10-25 K） -------------------
+    // 素材表、分区、缩略图解码都在这里，合并页不要再抄一份文件名（抄了就会两边跑偏）。
+
+    /** 内置壁纸张数。 */
+    static int count() { return FILES.length; }
+
+    /** 中文名，n<0 = 默认壁纸。 */
+    static String nameOf(int n) { return n < 0 ? "默认壁纸" : ZH[n]; }
+
+    /** 分区数与第 g 个分区的标题 / 起止下标（含头不含尾）。 */
+    static int groupCount() { return GROUPS.length; }
+    static String groupName(int g) { return GROUPS[g]; }
+    static int groupStart(int g) { return GROUP_FROM[g]; }
+    static int groupEnd(int g) { return GROUP_TO[g]; }
+
+    /** 缩略图（4 倍降采样），供合并页的格子直接画；失败返回 null 由调用方留空。 */
+    static Bitmap thumbFor(Context ctx, int n) {
+        try (InputStream input = ctx.getAssets().open("wallpapers/" + FILES[n] + ".jpg")) {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inSampleSize = 4;
+            return BitmapFactory.decodeStream(input, null, options);
+        } catch (IOException | OutOfMemoryError e) {
+            return null;
+        }
+    }
+
     private Bitmap fullImage(int n) {
         android.util.DisplayMetrics screen = activity.getResources().getDisplayMetrics();
         BitmapFactory.Options bounds = new BitmapFactory.Options();
@@ -263,6 +290,30 @@ final class WallpaperController {
     }
 
     void resume() { active = true; schedule(); }
+
+    /**
+     * 重新读一遍壁纸设置并刷新（2026-10-25 K）：壁纸与屏保页写的是同一份 prefs，
+     * 桌面从那一页回来时必须重解，否则要等进程重启才看得到新壁纸。
+     */
+    void reload() {
+        int newIndex = preferences.getInt("index", 0);
+        boolean newDefault = preferences.getBoolean("default", !preferences.contains("index"));
+        boolean newRotating = preferences.getBoolean("rotating", true);
+        if (newDefault) newRotating = false;
+        if (newIndex < 0 || newIndex >= FILES.length) newIndex = 0;
+        boolean newBing = preferences.getBoolean("bing", false) && bing.enabled() && bing.file() != null;
+
+        boolean same = newIndex == index && newDefault == useDefault
+                && newRotating == rotating && newBing == bingMode;
+        index = newIndex;
+        useDefault = newDefault;
+        rotating = newRotating;
+        bingMode = newBing;
+        if (same) { schedule(); return; }
+        releaseBitmaps();
+        display(useDefault ? -1 : (bingMode ? -2 : index), true);
+        schedule();
+    }
 
     /** 内存紧张时放开壁纸位图（满屏 1080p RGB_565 约 4MB）；从后台回来时 restore() 重新解码。 */
     void releaseBitmaps() {

@@ -28,7 +28,8 @@ import java.util.Locale;
  *
  * 右上角弹出的毛玻璃面板，内容分三块：
  *  1. 大号时间日期 + 网络状态（右上）
- *  2. 三排 3×3 入口：信号源 / 网络 / 系统设置；桌面设置 / 屏保 / 壁纸；内存清理 / 检查更新 / 关于
+ *  2. 两排 2×3 入口：系统设置 / 桌面设置 / 内存清理；壁纸与屏保 / 检查更新 / 关于
+ *     （2026-10-25 K：信号源与网络搬回桌面顶栏，屏保+壁纸合成一页，共 6 个入口）
  *  3. 底部守护状态 + 版本号
  *
  * 方向键自己接管：面板是透明 Activity，盖在桌面之上，如果交给系统做焦点搜索，
@@ -58,25 +59,20 @@ public final class QuickSettingsActivity extends Activity {
         date.setText(new SimpleDateFormat("M月d日 EEEE", Locale.CHINA).format(new Date()));
         refreshNetwork();
 
-        // ---- 磁贴：3 × 3 ----
+        // ---- 磁贴：2 × 3（2026-10-25 K：信号源/网络改到桌面顶栏，屏保+壁纸合成「壁纸与屏保」，
+        //      控制中心从 9 个入口收到 6 个）----
         LinearLayout row1 = findViewById(R.id.tiles1);
         LinearLayout row2 = findViewById(R.id.tiles2);
-        LinearLayout row3 = findViewById(R.id.tiles3);
-        grid.add(new ArrayList<>());
         grid.add(new ArrayList<>());
         grid.add(new ArrayList<>());
 
-        addTile(0, row1, R.drawable.ic_input, R.string.cc_tile_inputs, TileKind.INPUTS);
-        addTile(0, row1, R.drawable.ic_wifi, R.string.cc_tile_network, TileKind.NETWORK);
         addTile(0, row1, R.drawable.ic_settings, R.string.cc_tile_system_settings, TileKind.SYSTEM_SETTINGS);
+        addTile(0, row1, R.drawable.ic_home_settings, R.string.cc_tile_settings, TileKind.LAUNCHER_SETTINGS);
+        addTile(0, row1, R.drawable.ic_clean, R.string.cc_tile_clean, TileKind.CLEAN);
 
-        addTile(1, row2, R.drawable.ic_home_settings, R.string.cc_tile_settings, TileKind.LAUNCHER_SETTINGS);
-        addTile(1, row2, R.drawable.ic_screensaver, R.string.cc_tile_screensaver, TileKind.SCREENSAVER);
-        addTile(1, row2, R.drawable.ic_wallpaper, R.string.cc_tile_wallpaper, TileKind.WALLPAPER);
-
-        addTile(2, row3, R.drawable.ic_clean, R.string.cc_tile_clean, TileKind.CLEAN);
-        addTile(2, row3, R.drawable.ic_refresh, R.string.cc_tile_update, TileKind.CHECK_UPDATE);
-        addTile(2, row3, R.drawable.ic_info, R.string.cc_tile_about, TileKind.ABOUT);
+        addTile(1, row2, R.drawable.ic_screensaver, R.string.cc_tile_personalize, TileKind.PERSONALIZE);
+        addTile(1, row2, R.drawable.ic_refresh, R.string.cc_tile_update, TileKind.CHECK_UPDATE);
+        addTile(1, row2, R.drawable.ic_info, R.string.cc_tile_about, TileKind.ABOUT);
 
         // 第一枚先拿焦点
         if (!grid.get(0).isEmpty()) grid.get(0).get(0).requestFocus();
@@ -87,7 +83,7 @@ public final class QuickSettingsActivity extends Activity {
 
     // ---- 磁贴 ---------------------------------------------------------------------------------
 
-    private enum TileKind { INPUTS, NETWORK, SYSTEM_SETTINGS, LAUNCHER_SETTINGS, SCREENSAVER, CLEAN, CHECK_UPDATE, ABOUT, WALLPAPER }
+    private enum TileKind { SYSTEM_SETTINGS, LAUNCHER_SETTINGS, CLEAN, PERSONALIZE, CHECK_UPDATE, ABOUT }
 
     private void addTile(int rowIndex, LinearLayout row, int icon, int label, TileKind kind) {
         View tile = getLayoutInflater().inflate(R.layout.item_cc_tile, row, false);
@@ -124,18 +120,6 @@ public final class QuickSettingsActivity extends Activity {
 
     private void activate(TileKind kind) {
         switch (kind) {
-            case INPUTS:
-                finish();
-                startActivity(new Intent(this, MainActivity.class)
-                        .setAction(MainActivity.ACTION_SHOW_INPUTS)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP));
-                break;
-            case NETWORK:
-                finish();
-                if (!TvSettings.openWifi(this)) {
-                    Toast.makeText(this, R.string.not_available, Toast.LENGTH_SHORT).show();
-                }
-                break;
             case SYSTEM_SETTINGS:
                 finish();
                 if (!TvSettings.openSettings(this)) {
@@ -148,23 +132,14 @@ public final class QuickSettingsActivity extends Activity {
                         .setAction(MainActivity.ACTION_LAUNCHER_SETTINGS)
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP));
                 break;
-            case SCREENSAVER:
+            case PERSONALIZE:
                 finish();
-                startActivity(new Intent(this, ScreensaverSettingsActivity.class)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                startActivity(new Intent(this, PersonalizeActivity.class));
                 break;
             case CLEAN:
                 finish();
                 startActivity(new Intent(this, MemoryCleanSettingsActivity.class)
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-                break;
-            case WALLPAPER:
-                finish();
-                // 回到桌面的全屏壁纸选择器（WallpaperController.showPicker）：
-                // 缩略图预览、轮播、必应每日壁纸都在那一页，不要另做简易列表页。
-                startActivity(new Intent(this, MainActivity.class)
-                        .setAction(MainActivity.ACTION_SHOW_WALLPAPER)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP));
                 break;
             case CHECK_UPDATE:
                 finish();
@@ -182,7 +157,7 @@ public final class QuickSettingsActivity extends Activity {
         }
     }
 
-    // ---- 焦点导航：九宫格自己走，焦点出不去面板 ------------------------------------------------
+    // ---- 焦点导航：两排三列自己走，焦点出不去面板 ------------------------------------------------
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {

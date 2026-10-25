@@ -11,9 +11,9 @@ import android.widget.Toast;
 /**
  * 桌面设置（2026-10-23 K）。
  *
- * 壁纸 / 屏保 / 内存清理 都拆成了独立页面，这里只保留入口，避免同一个功能在两处设置。
+ * 壁纸与屏保已从本页撤走（2026-10-25 K）：控制中心有独立的「壁纸与屏保」入口，
+ * 同一功能不再在两处重复出现。本页只留布局/动效/更新/清理/系统五组。
  *   布局：每行应用数量、应用栏下方保留行数
- *   外观：壁纸 → 桌面整屏选择器、屏保 → ScreensaverSettingsActivity
  *   动效：动态效果、减弱动画、高级动态效果、恢复主题默认
  *   软件更新：更新方式、检查更新
  *   存储与清理：内存清理 → MemoryCleanSettingsActivity、快传
@@ -39,8 +39,6 @@ public final class LauncherSettingsActivity extends Activity {
     private TextView advancedValue;
     private TextView advancedOffHint;
     private View followThemeChoice;
-    private TextView wallpaperEntryValue;
-    private TextView screensaverEntryValue;
     private TextView memoryEntryValue;
     private TextView updateManualChoice;
     private TextView updateAutoChoice;
@@ -130,20 +128,6 @@ public final class LauncherSettingsActivity extends Activity {
                 refresh();
             });
         }
-
-        // ===== 外观：壁纸 / 屏保（各自独立页） =====
-        wallpaperEntryValue = findViewById(R.id.wallpaperEntryValue);
-        screensaverEntryValue = findViewById(R.id.screensaverEntryValue);
-        findViewById(R.id.wallpaperEntry).setOnClickListener(v -> {
-            // 壁纸用桌面自带的整屏选择器（缩略图 + 轮播 + 必应每日壁纸）
-            setResult(RESULT_OK);
-            finish();
-            startActivity(new Intent(this, MainActivity.class)
-                    .setAction(MainActivity.ACTION_SHOW_WALLPAPER)
-                    .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP));
-        });
-        findViewById(R.id.screensaverEntry).setOnClickListener(v ->
-                startActivity(new Intent(this, ScreensaverSettingsActivity.class)));
 
         // ===== 开关：动态效果 =====
         animationsChoice = findViewById(R.id.animationsChoice);
@@ -316,16 +300,7 @@ public final class LauncherSettingsActivity extends Activity {
         advancedValue.setText(advancedEffects ? R.string.on : R.string.off);
         advancedValue.setTextColor(advancedEffects ? 0xFF4ADE80 : 0x66FFFFFF);
 
-        // 入口当前值：壁纸 / 屏保 / 内存清理
-        String wallpaperCurrent = choices.getString(Config.WALLPAPER_CHOICE_KEY, null);
-        wallpaperEntryValue.setText("none".equals(wallpaperCurrent) ? getString(R.string.wallpaper_none)
-                : wallpaperCurrent != null ? wallpaperCurrent
-                : getString(R.string.wallpaper_theme_default));
-
-        boolean idleOn = choices.getBoolean("idle_clock_enabled", true);
-        boolean bing = "bing".equals(choices.getString("screensaver_style", "clock")) && !BuildConfig.LITE;
-        screensaverEntryValue.setText((bing ? "壁纸" : "时间") + " · " + getString(idleOn ? R.string.on : R.string.off));
-
+        // 入口当前值：内存清理（壁纸/屏保已从桌面设置撤走，改到控制中心的「壁纸与屏保」）
         boolean cleanOn = choices.getBoolean("auto_clean_enabled", false);
         memoryEntryValue.setText(cleanOn ? "自动 · 开" : "自动 · 关");
         memoryEntryValue.setTextColor(cleanOn ? 0xFF4ADE80 : 0x66FFFFFF);

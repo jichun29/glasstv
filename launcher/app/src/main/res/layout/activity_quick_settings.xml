@@ -111,17 +111,6 @@
             android:clipChildren="false"
             android:clipToPadding="false" />
 
-        <!-- 第三排：内存清理 / 检查更新 / 关于 -->
-        <LinearLayout
-            android:id="@+id/tiles3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_marginTop="6dp"
-            android:clipChildren="false"
-            android:clipToPadding="false" />
-
         <!-- 底部：守护状态 + 版本号 -->
         <LinearLayout
             android:layout_width="match_parent"

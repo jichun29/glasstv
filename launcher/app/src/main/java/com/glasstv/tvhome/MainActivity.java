@@ -541,12 +541,16 @@ public class MainActivity extends Activity implements AppAdapter.TileListener, T
 
         btnInputs = findViewById(R.id.btnInputs);
         TextView btnSettings = findViewById(R.id.btnSettings);
-        // 右上角统一为单一控制中心入口；原信号源/Wi-Fi/设置能力都收进控制中心。
+        // 2026-10-25 K：右上角 = 信号源 / 网络 / 控制中心。信号源和网络从控制面板搬回顶栏常驻，
+        // 控制面板只留 6 个入口（系统设置/桌面设置/内存清理/壁纸与屏保/检查更新/关于）。
         View topButtons = findViewById(R.id.topButtons);
         if (topButtons != null) topButtons.setVisibility(cfg.topBar ? View.VISIBLE : View.GONE);
-        btnInputs.setVisibility(View.GONE);
-        btnWifi.setVisibility(View.GONE);
+        btnInputs.setVisibility(View.VISIBLE);
+        ((TextView) btnInputs).setText(R.string.cc_tile_inputs);
+        ((TextView) btnInputs).setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_input, 0, 0, 0);
         btnInputs.setOnClickListener(v -> showInputs());
+        btnWifi.setVisibility(cfg.showNetworkPill ? View.VISIBLE : View.GONE);
+        btnWifi.setOnClickListener(v -> openNetworkPill());
         btnSettings.setText(R.string.settings);
         btnSettings.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_settings, 0, 0, 0);
         btnSettings.setOnClickListener(v -> open(new Intent(this, QuickSettingsActivity.class)));
@@ -750,6 +754,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener, T
     protected void onResume() {
         super.onResume();
         HomeGuardService.setHomeInFront(this, true);   // 守护靠这个分辨「被杀时我们在前台」
+        // 壁纸/屏保可能在控制中心的「壁纸与屏保」页被改过：回桌面重读一次，免得要重启进程才生效。
+        if (wallpapers != null) wallpapers.reload();
         if (!BuildConfig.LITE) Weather.refreshIfStale(); // 天气一小时一取，回到前台顺手看一眼
         // A festival that started or ended while Home was in the background: rebuild with or without it.
         if (festive != festival.active(LocalDate.now())) {
@@ -902,6 +908,14 @@ public class MainActivity extends Activity implements AppAdapter.TileListener, T
 
     private void restartIdleClock() {
         root.removeCallbacks(showIdleClock);
+        // 屏保开关可能在「壁纸与屏保」页被改过：每次重启倒计时前重读一次，
+        // 否则关了还得等进程重启才不进屏保（2026-10-25 K）。
+        boolean enabled = getSharedPreferences(Config.SETTINGS_NAME, MODE_PRIVATE)
+                .getBoolean("idle_clock_enabled", true);
+        long minutes = Config.load(this).homeIdleClockMinutes;
+        idleClockMs = enabled
+                ? (minutes > 0 ? minutes : DEFAULT_IDLE_CLOCK_MINUTES) * MINUTE_MS
+                : 0;
         if (idleClockMs > 0) root.postDelayed(showIdleClock, idleClockMs);
     }
 
@@ -2471,9 +2485,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener, T
         return new Intent(standardAction);   // nothing found: let open() show the can't-open toast
     }
 
-    /** Inputs is a control-center action; keep the old standalone pill hidden. */
+    /** Inputs 是顶栏常驻入口（2026-10-25 K），这里只让它在 top_bar 关闭时跟着整组一起藏。 */
     private void updateInputsButton() {
-        btnInputs.setVisibility(View.GONE);
+        if (btnInputs == null) return;
+        btnInputs.setVisibility(topBarHidden() ? View.GONE : View.VISIBLE);
     }
 
     /** The Live TV app's launch intent: its leanback entry point, or the configured action if it has none. */

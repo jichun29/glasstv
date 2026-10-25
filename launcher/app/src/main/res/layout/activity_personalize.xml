@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 个性化（壁纸 + 屏保）合并页（2026-10-25 K）：控制中心从 9 个入口收到 6 个，
+     原来分开的「屏保」「壁纸」两页合成这一页——上面是壁纸（缩略图网格 + 轮播/必应开关），
+     下面是屏保（时间/必应两张卡 + 开关 + 间隔 + 预览）。
+     坐标按 960x540dp（1920x1080 ÷ 2.0）排，任何控件 x + 宽度不越 960dp。 -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/saver_page_bg">
+
+    <!-- 标题 -->
+    <TextView
+        android:id="@+id/pzTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="22dp"
+        android:text="壁纸与屏保"
+        android:textColor="#FFFFFFFF"
+        android:textSize="24sp"
+        android:fontFamily="@font/outfit_medium"
+        android:letterSpacing="0.02" />
+
+    <!-- 标题下：当前壁纸状态 -->
+    <TextView
+        android:id="@+id/pzWallpaperMode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="58dp"
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:maxWidth="560dp"
+        android:text="当前：默认壁纸"
+        android:textColor="#80FFFFFF"
+        android:textSize="13sp"
+        android:fontFamily="@font/outfit_regular" />
+
+    <!-- 右上：壁纸轮播 + 必应每日 两个开关 -->
+    <TextView
+        android:id="@+id/pzRotate"
+        android:layout_width="164dp"
+        android:layout_height="42dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="82dp"
+        android:gravity="center"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="@drawable/saver_pill"
+        android:text="壁纸轮播：开"
+        android:textColor="#FFFFFFFF"
+        android:textSize="14sp"
+        android:fontFamily="@font/outfit_medium" />
+
+    <TextView
+        android:id="@+id/pzBingDaily"
+        android:layout_width="164dp"
+        android:layout_height="42dp"
+        android:layout_marginStart="224dp"
+        android:layout_marginTop="82dp"
+        android:gravity="center"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="@drawable/saver_pill"
+        android:text="必应每日：关"
+        android:textColor="#FFFFFFFF"
+        android:textSize="14sp"
+        android:fontFamily="@font/outfit_medium" />
+
+    <!-- 屏保开关胶囊 -->
+    <TextView
+        android:id="@+id/pzIdleSwitch"
+        android:layout_width="152dp"
+        android:layout_height="42dp"
+        android:layout_marginStart="760dp"
+        android:layout_marginTop="82dp"
+        android:gravity="center"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="@drawable/saver_pill"
+        android:text="屏保：开"
+        android:textColor="#FFFFFFFF"
+        android:textSize="14sp"
+        android:fontFamily="@font/outfit_medium" />
+
+    <!-- ============ 壁纸：缩略图网格（4 列 × 3 行，可滚动） ============ -->
+    <ScrollView
+        android:id="@+id/pzWallpaperScroll"
+        android:layout_width="560dp"
+        android:layout_height="330dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="140dp"
+        android:scrollbars="none"
+        android:clipToPadding="false">
+
+        <LinearLayout
+            android:id="@+id/pzWallpaperColumn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </ScrollView>
+
+    <!-- ============ 右侧：屏保 ============ -->
+    <TextView
+        android:id="@+id/pzSaverLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="640dp"
+        android:layout_marginTop="140dp"
+        android:text="屏保样式"
+        android:textColor="#66FFFFFF"
+        android:textSize="12sp"
+        android:letterSpacing="0.12" />
+
+    <!-- 屏保卡片一：时间 -->
+    <FrameLayout
+        android:id="@+id/pzSaverClock"
+        android:layout_width="132dp"
+        android:layout_height="150dp"
+        android:layout_marginStart="640dp"
+        android:layout_marginTop="162dp"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="@drawable/saver_card"
+        android:padding="5dp"
+        android:clipChildren="false">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="106dp"
+            android:background="@drawable/saver_card_preview">
+
+            <TextClock
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:format12Hour="HH:mm"
+                android:format24Hour="HH:mm"
+                android:textColor="#F2FFFFFF"
+                android:textSize="30sp"
+                android:fontFamily="@font/outfit_extralight"
+                android:includeFontPadding="false" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/pzClockCaption"
+            android:layout_width="match_parent"
+            android:layout_height="28dp"
+            android:layout_gravity="bottom"
+            android:gravity="center"
+            android:text="时间"
+            android:textColor="#E6FFFFFF"
+            android:textSize="13sp"
+            android:fontFamily="@font/outfit_regular" />
+    </FrameLayout>
+
+    <!-- 屏保卡片二：必应壁纸 -->
+    <FrameLayout
+        android:id="@+id/pzSaverBing"
+        android:layout_width="132dp"
+        android:layout_height="150dp"
+        android:layout_marginStart="784dp"
+        android:layout_marginTop="162dp"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="@drawable/saver_card"
+        android:padding="5dp"
+        android:clipChildren="false">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="106dp"
+            android:background="@drawable/saver_card_preview">
+
+            <ImageView
+                android:id="@+id/pzBingThumb"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:contentDescription="@null" />
+
+            <TextView
+                android:id="@+id/pzBingPlaceholder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp"
+                android:text="联网后自动取图"
+                android:textColor="#66FFFFFF"
+                android:textSize="11sp" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/pzBingCaption"
+            android:layout_width="match_parent"
+            android:layout_height="28dp"
+            android:layout_gravity="bottom"
+            android:gravity="center"
+            android:text="必应每日"
+            android:textColor="#E6FFFFFF"
+            android:textSize="13sp"
+            android:fontFamily="@font/outfit_regular" />
+    </FrameLayout>
+
+    <!-- 换图间隔（仅必应壁纸屏保时出现） -->
+    <TextView
+        android:id="@+id/pzIntervalLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="640dp"
+        android:layout_marginTop="330dp"
+        android:text="换图间隔"
+        android:textColor="#66FFFFFF"
+        android:textSize="12sp"
+        android:letterSpacing="0.12"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/pzEveryTime"
+        android:layout_width="76dp"
+        android:layout_height="38dp"
+        android:layout_marginStart="640dp"
+        android:layout_marginTop="352dp"
+        android:gravity="center"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="@drawable/saver_segment"
+        android:text="每次"
+        android:textColor="#FFFFFFFF"
+        android:textSize="13sp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/pzEvery1h"
+        android:layout_width="76dp"
+        android:layout_height="38dp"
+        android:layout_marginStart="724dp"
+        android:layout_marginTop="352dp"
+        android:gravity="center"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="@drawable/saver_segment"
+        android:text="1 小时"
+        android:textColor="#FFFFFFFF"
+        android:textSize="13sp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/pzEvery1d"
+        android:layout_width="76dp"
+        android:layout_height="38dp"
+        android:layout_marginStart="808dp"
+        android:layout_marginTop="352dp"
+        android:gravity="center"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="@drawable/saver_segment"
+        android:text="1 天"
+        android:textColor="#FFFFFFFF"
+        android:textSize="13sp"
+        android:visibility="gone" />
+
+    <!-- 预览屏保 / 立即换一张 -->
+    <TextView
+        android:id="@+id/pzPreviewSaver"
+        android:layout_width="150dp"
+        android:layout_height="42dp"
+        android:layout_marginStart="640dp"
+        android:layout_marginTop="404dp"
+        android:gravity="center"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="@drawable/saver_pill"
+        android:text="预览屏保"
+        android:textColor="#FFFFFFFF"
+        android:textSize="14sp"
+        android:fontFamily="@font/outfit_medium" />
+
+    <TextView
+        android:id="@+id/pzNextImage"
+        android:layout_width="150dp"
+        android:layout_height="42dp"
+        android:layout_marginStart="802dp"
+        android:layout_marginTop="404dp"
+        android:gravity="center"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="@drawable/saver_pill"
+        android:text="立即换一张"
+        android:textColor="#FFFFFFFF"
+        android:textSize="14sp"
+        android:fontFamily="@font/outfit_medium"
+        android:visibility="gone" />
+
+    <!-- 底部说明 + 状态行 -->
+    <TextView
+        android:id="@+id/pzHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="490dp"
+        android:text="壁纸：方向键挑选，确定应用　·　屏保：按任意键退出"
+        android:textColor="#4DFFFFFF"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/pzStatus"
+        android:layout_width="560dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="512dp"
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:textColor="#80FFFFFF"
+        android:textSize="12sp" />
+</FrameLayout>

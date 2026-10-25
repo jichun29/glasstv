@@ -143,6 +143,8 @@
     <string name="cc_tile_update">检查更新</string>
     <string name="cc_tile_about">关于</string>
     <string name="cc_tile_wallpaper">壁纸</string>
+    <string name="cc_tile_personalize">壁纸与屏保</string>
+    <string name="personalize_title">壁纸与屏保</string>
     <string name="cc_guard_on">桌面守护已开启</string>
     <string name="cc_guard_off">桌面守护未开启</string>
     <string name="cc_wallpaper_hint">壁纸与屏保在「桌面设置」里</string>

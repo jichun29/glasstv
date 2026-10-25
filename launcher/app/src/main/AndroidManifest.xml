@@ -122,6 +122,12 @@
             android:theme="@android:style/Theme.Black.NoTitleBar"
             android:exported="false" />
         <!-- 屏保 / 壁纸 / 内存清理：从桌面设置里拆出来的三个独立页（2026-10-23 K） -->
+        <!-- 壁纸 + 屏保合并页（2026-10-25 K）：控制中心从 9 个入口收到 6 个 -->
+        <activity
+            android:name=".PersonalizeActivity"
+            android:label="@string/personalize_title"
+            android:exported="false"
+            android:screenOrientation="landscape" />
         <activity
             android:name=".ScreensaverSettingsActivity"
             android:label="屏保"

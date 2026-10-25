@@ -312,7 +312,8 @@
                 android:focusable="false"
                 android:visibility="gone" />
 
-            <!-- K 2026-10-22：右上角顶栏整组默认隐藏（K 评价「完全不必要」），全部功能进控制中心。
+            <!-- K 2026-10-25：右上角顶栏 = 信号源 / 网络 / 控制中心 三个入口。
+                 信号源和网络从控制面板里搬出来常驻顶栏，控制面板只留 6 个入口。
                  config.xml 设 top_bar=true 才显示；同时受 icon_only_buttons / show_network_pill 限制。 -->
             <LinearLayout
                 android:id="@+id/topButtons"
@@ -329,21 +330,22 @@
                 <TextView
                     android:id="@+id/btnInputs"
                     style="@style/TopButton"
-                    android:text="@string/inputs"
+                    android:text="@string/cc_tile_inputs"
                     android:drawableStart="@drawable/ic_input"
                     android:nextFocusDown="@+id/grid" />
 
                 <TextView
                     android:id="@+id/btnWifi"
                     style="@style/TopButton"
-                    android:maxWidth="180dp"
+                    android:maxWidth="200dp"
                     android:singleLine="true"
                     android:ellipsize="end"
                     android:text="@string/wifi"
                     android:drawableStart="@drawable/ic_wifi"
                     android:nextFocusDown="@+id/grid" />
 
-                <!-- K 2026-10-22：重排按钮从顶栏撤下（控制中心里有「重排图标」），顶栏只留三个常用项 -->
+                <!-- K 2026-10-22：重排按钮从顶栏撤下（菜单键/设置里都有），这里保留视图但隐藏，
+                     MainActivity 仍引用它的激活态。 -->
                 <TextView
                     android:id="@+id/btnReorder"
                     style="@style/TopButtonIcon"
@@ -352,6 +354,7 @@
                     android:drawableStart="@drawable/ic_swap_vert"
                     android:nextFocusDown="@+id/grid" />
 
+                <!-- K 2026-10-22：重排按钮从顶栏撤下（控制中心里有「重排图标」），顶栏只留三个常用项 -->
                 <TextView
                     android:id="@+id/btnLibraryTop"
                     style="@style/TopButtonIcon"

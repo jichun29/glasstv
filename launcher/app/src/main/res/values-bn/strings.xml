@@ -27,7 +27,7 @@
     <string name="vpn">VPN</string>
     <string name="vpn_off">VPN বন্ধ</string>
     <string name="home_settings">ডিফল্ট হোম বেছে নিন</string>
-    <string name="home_settings_help">CleanYourTV-কে আর হোম হিসেবে ব্যবহার না করতে আপনার আগের হোম বেছে নিন, আবার ফিরতে CleanYourTV বেছে নিন। আগের লঞ্চারটি চালু থাকতে হবে এবং আপনার টিভিতে হোম বেছে নেওয়ার ব্যবস্থা থাকতে হবে; সেটি বন্ধ করা থাকলে আগে রিস্টোর স্ক্রিপ্ট চালান।</string>
+    <string name="home_settings_help">GlassTV-কে আর হোম হিসেবে ব্যবহার না করতে আপনার আগের হোম বেছে নিন, আবার ফিরতে GlassTV বেছে নিন। আগের লঞ্চারটি চালু থাকতে হবে এবং আপনার টিভিতে হোম বেছে নেওয়ার ব্যবস্থা থাকতে হবে; সেটি বন্ধ করা থাকলে আগে রিস্টোর স্ক্রিপ্ট চালান।</string>
     <string name="launcher_settings">লঞ্চার সেটিংস</string>
     <string name="columns_label">প্রতি সারিতে অ্যাপ</string>
     <string name="animations_state">অ্যানিমেশন: %1$s</string>

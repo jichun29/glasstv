@@ -3,19 +3,19 @@ plugins {
 }
 
 android {
-    namespace 'com.gathin.tvhome'
+    namespace 'com.glasstv.tvhome'
     compileSdk 34
 
     defaultConfig {
         // Opt-in identity for firmware with a package-name HOME allowlist; see docs/devices/xiaomi-mitv-aetp0-dofus.md.
-        applicationId providers.gradleProperty('launcherApplicationId').getOrElse('com.gathin.tvhome')
+        applicationId providers.gradleProperty('launcherApplicationId').getOrElse('com.glasstv.tvhome')
         // lite = Android 4.4/5.0 老盒子（minSdk 19 + versionName 带 -lite，见 skill tv-launcher-release-rules）。
         def lite = providers.gradleProperty('liteBuild').getOrElse('false').toBoolean()
         minSdk (lite ? 19 : 21)
         multiDexEnabled true
         targetSdk 34
-        versionCode 60
-        versionName lite ? '3.10.3-lite' : '3.10.3'
+        versionCode 61
+        versionName lite ? '4.0.0-lite' : '4.0.0'
     }
 
     signingConfigs {

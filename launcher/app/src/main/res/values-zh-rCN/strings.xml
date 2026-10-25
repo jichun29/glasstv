@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">主屏幕</string>
+    <string name="app_name">玻璃桌面</string>
     <string name="inputs">输入源</string>
     <string name="wifi">无线网络</string>
     <string name="settings">控制中心</string>
@@ -43,7 +43,7 @@
     <string name="vpn">VPN</string>
     <string name="vpn_off">VPN 已断开</string>
     <string name="menu_sleep">休眠</string>
-    <string name="sleep_unavailable">休眠需要开启 CleanYourTV 休眠服务：设置 > 无障碍</string>
+    <string name="sleep_unavailable">休眠需要开启 GlassTV 休眠服务：设置 > 无障碍</string>
     <string name="launcher_settings">桌面设置</string>
     <string name="settings_group_layout">桌面布局</string>
     <string name="settings_group_motion">动效</string>
@@ -120,8 +120,8 @@
     <string name="greeting_with_name">%1$s，%2$s</string>
     <string name="menu_about">关于桌面</string>
     <string name="about_title">关于桌面</string>
-    <string name="about_project">CleanYourTV</string>
+    <string name="about_project">GlassTV</string>
     <string name="about_forked">K 定制维护</string>
-    <string name="about_repo">github.com/jichun29/cleanyourtv-k</string>
+    <string name="about_repo">github.com/jichun29/glasstv</string>
     <string name="about_version">版本 %1$s</string>
 </resources>

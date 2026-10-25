@@ -85,7 +85,7 @@ To customize the 4 apps pinned to the dock at the bottom of the screen:
    ```
 3. Re-run `run_build.ps1` to rebuild and deploy.
 
-Alternatively, you can place a `config.json` on the TV under `/sdcard/Android/data/com.gathin.tvhome/files/config.json`:
+Alternatively, you can place a `config.json` on the TV under `/sdcard/Android/data/com.glasstv.tvhome/files/config.json`:
 ```json
 {
   "dock_apps": [
@@ -103,7 +103,7 @@ Alternatively, you can place a `config.json` on the TV under `/sdcard/Android/da
 
 To set a custom wallpaper background:
 
-1. Place your JPEG image named `wallpaper.jpg` in `/sdcard/Android/data/com.gathin.tvhome/files/`.
+1. Place your JPEG image named `wallpaper.jpg` in `/sdcard/Android/data/com.glasstv.tvhome/files/`.
 2. Push a `config.json` file to the same folder containing:
    ```json
    {

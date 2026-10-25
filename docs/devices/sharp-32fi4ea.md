@@ -11,7 +11,7 @@ Several days of normal use have not yet been documented. These are initial devic
 ## Launcher and TV packages
 
 - Stock HOME: `com.google.android.tvlauncher/.MainActivity`.
-- Replacement HOME: `com.gathin.tvhome/.MainActivity` (reference launcher v2.4, built targeting SDK 34).
+- Replacement HOME: `com.glasstv.tvhome/.MainActivity` (reference launcher v2.4, built targeting SDK 34).
 - Live TV: `com.mediatek.wwtv.tvcenter`.
 - TV input: `com.mediatek.tvinput`.
 - TV service: `com.mediatek.tv.service`.

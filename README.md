@@ -1,6 +1,14 @@
-# CleanYourTV · K 定制版
+# GlassTV · 玻璃桌面
 
-**给国产电视的一块干净桌面。** 没有广告位，没有推荐流，只有你的 App、你选的壁纸、和时钟屏保。
+**给电视一块干净的玻璃桌面。** 没有广告位，没有推荐流，只有你的 App、你选的壁纸、和时钟屏保。
+
+> ### 4.0.0 起正式改名 GlassTV
+>
+> 本仓库原名 `cleanyourtv-k`，从 **4.0.0** 起统一改名为 **GlassTV（玻璃桌面）**：
+> 仓库、官网、应用显示名、安装包文件名全部换新，包名同步改为 `com.glasstv.tvhome`。
+> 历史版本的 Release 与更新记录保持原样，不作改动。
+>
+> 因为包名变了，GlassTV 与旧版可以并存；旧版布局不会自动迁移，建议确认新版没问题后再卸载旧版。
 
 > 本仓库是开源电视桌面 [Gathin23/cleanyourtv](https://github.com/Gathin23/cleanyourtv) 的中文二次开发版，
 > 融合了 [BeatsAD/quiet-tv](https://github.com/BeatsAD/quiet-tv)（壁纸模块，MIT）、
@@ -9,13 +17,16 @@
 >
 > 小米国行电视实测可用（MiTV-ASTP0 / Android 9），理论上所有 Android TV 4.4+ 都能跑。
 
+- 源码：https://github.com/jichun29/glasstv
+- 下载：见 [Releases](https://github.com/jichun29/glasstv/releases)
+
 ## 让 AI 帮你装（最省事）
 
 不想自己敲命令？把下面这段话整段复制，发给能在电脑上跑命令的 AI 助手（Claude Code、Codex、Trae、豆包电脑版等），电脑和电视连同一 Wi-Fi 就行：
 
 ```text
-请帮我把开源电视桌面 CleanYourTV-K 装到我的电视上，并设为开机进入的桌面。
-项目地址：https://github.com/jichun29/cleanyourtv-k
+请帮我把开源电视桌面 GlassTV 装到我的电视上，并设为开机进入的桌面。
+项目地址：https://github.com/jichun29/glasstv
 请先完整读完仓库里的 PROMPT.md（安装说明）再动手：tools/ 和 launcher/ 直接复用，不用从头写。
 我的电视型号是：____（填你的型号）
 
@@ -27,39 +38,75 @@
 
 ## 截图
 
-| 桌面 | 时钟屏保 | 应用菜单（菜单键） |
+全部为小米电视 MiTV-ASTP0 真机实拍：
+
+| 桌面 | 控制中心 | 壁纸选择 |
 |:---:|:---:|:---:|
-| ![桌面](docs/screenshots/home.png) | ![时钟屏保](docs/screenshots/clock-screensaver.png) | ![应用菜单](docs/screenshots/tile-menu.png) |
-| 大号时钟 + 天气 + Dock 应用行 | 闲置自动进入，每分钟漂移防烧屏 | 打开 / 隐藏 / 置顶 / 移动位置 / 卸载 / 应用信息 |
+| ![桌面](docs/shots/home.png) | ![控制中心](docs/shots/control-center.png) | ![壁纸](docs/shots/wallpaper.png) |
+| 壁纸 + 大号时间天气 + 应用栏 | 九宫格入口，从信号源到检查更新 | 4 列缩略图，按分组挑选 |
+
+| 桌面设置 | 壁纸页全貌 |
+|:---:|:---:|
+| ![设置](docs/shots/settings.png) | ![壁纸页](docs/shots/wallpaper-page.png) |
+| 布局 / 外观 / 时间与天气 / 动效 | 默认壁纸 + 四组共 11 张 |
 
 ## 功能
 
 ### 首页
 
-- **大号细体时钟 + 天气**：壁纸上显示时间、日期、天气（城市 温度 天气 低/高温，免 key 接口国内直连）。往下滚动时时钟淡出。
-- **应用网格**：每行 5 个。聚焦时磁贴浮起、出现柔光；按到边缘轻轻倾斜回弹。
+- **大号时钟 + 天气**：壁纸上显示时间、日期、天气（城市 温度 天气 低/高温，免 key 接口国内直连）。往下滚动时时钟淡出。
+- **字号三档**：标准 / 大 / 特大，日期与天气按比例跟随（桌面设置 → 时间与天气）。
+- **应用网格**：每行应用数量 4~7 可调，应用栏下方保留 0~3 行。
 - **应用全收录**：标准 TV 入口和手机入口都会显示，小米的「应用中心」「高清播放器」这类没标准入口的系统 App 也在。
 - **返回键**：在网格里按返回回到第一行；在第一行再按返回进入时钟屏保。
-- **天气城市**：默认按网络位置猜一次；打包时可在 `config.xml` 里写死城市名（如「宜昌」）就不猜了。
+
+### 控制中心
+
+右上角一个胶囊按钮，滑出毛玻璃面板：
+
+- 第一排：信号源 / 网络 / 系统设置
+- 第二排：桌面设置 / 屏保 / 壁纸
+- 第三排：内存清理 / 检查更新 / 关于
+- 顶部显示时间日期与 WiFi 名，底部提示桌面守护状态 + 版本号
+
+### 壁纸
+
+- **11 张内置壁纸**：自然风景 4（海岸暮色 / 森林晨光 / 金色瀑布 / 雪山湖泊）、跑车 2、卡通场景 2、清简风景 3。
+- 整屏 4 列缩略图网格，焦点停在哪张就用哪张做背景预览，OK 应用、返回不改。
+- 壁纸轮播（默认关）、必应每日（默认关）两个开关。
+
+### 时间与天气（桌面设置）
+
+- **字号**：标准 / 大 / 特大。
+- **天气城市**：点开输入框手填，留空 = 自动定位（需给应用位置权限）。
+- **背景颜色**：纯黑 / 午夜蓝 / 酒红 / 石板灰（壁纸关掉或缺图时才看得见）。
 
 ### 菜单键 = 应用菜单
 
 选中 App 按遥控器「菜单 ≡」键：**打开 / 从主屏幕隐藏 / 置顶 / 移动位置 / 卸载 / 应用信息**。
 
+### 自动清理内存
+
+按间隔清理后台进程，可设白名单保住要常驻的应用，也能随时手动清一次。
+
+### 快传
+
+桌面开一个局域网网页，手机扫码把 APK 直接推进电视，不用 U 盘。
+
 ### 桌面守护
 
-小米等国行固件待机时会强杀第三方桌面，醒来露出自带广告桌面。桌面守护（无障碍服务）盯着窗口切换：原生桌面一冒头就把 CleanYourTV 拉回来。只盯窗口、不读内容、不拦按键。
+小米等国行固件待机时会强杀第三方桌面，醒来露出自带广告桌面。桌面守护（无障碍服务）盯着窗口切换：原生桌面一冒头就把 GlassTV 拉回来。只盯窗口、不读内容、不拦按键。
 
 装上后需 adb 开一次（一次性）：
 
 ```bash
-adb shell settings put secure enabled_accessibility_services com.gathin.tvhome/com.gathin.tvhome.HomeGuardService
+adb shell settings put secure enabled_accessibility_services com.glasstv.tvhome/com.glasstv.tvhome.HomeGuardService
 adb shell settings put secure accessibility_enabled 1
 ```
 
 ### 一键更新
 
-桌面「设置 → 检查更新」：查到新版本后点「下载并安装」，应用内下完 APK 直接交系统安装器，装完自动重启桌面。不用开电脑、不用跳浏览器。
+控制中心 → 检查更新：查到新版本后点「下载并安装」，应用内下完 APK 直接交系统安装器，装完自动重启桌面。不用开电脑、不用跳浏览器。
 
 - 数据源只读本仓库 Releases，不联网第三方、不上报任何数据
 - 自动检查默认关闭，开了每 3 小时查一次
@@ -79,12 +126,12 @@ adb shell settings put secure accessibility_enabled 1
 
 ## 下载
 
-到 [Releases](../../releases/latest) 下载，**按设备选一个**：
+到 [Releases](https://github.com/jichun29/glasstv/releases/latest) 下载，**按设备选一个**：
 
-| 版本 | 支持系统 | 说明 |
+| 安装包 | 支持系统 | 说明 |
 |---|---|---|
-| `CleanYourTV-Launcher-universal.apk` | **Android 5.0+** | 通用版，功能完整，绝大多数电视/盒子用这个 |
-| `CleanYourTV-Launcher-lite44.apk` | **Android 4.4+** | 4.4 精简版，只砍必应每日壁纸和 HDMI 输入源菜单（4.4 系统没有这套接口），其余全保留 |
+| `GlassTV-Launcher-universal.apk` | **Android 5.0+** | 通用版，功能完整，绝大多数电视/盒子用这个 |
+| `GlassTV-Launcher-lite44.apk` | **Android 4.4+** | 4.4 精简版，砍必应每日壁纸、视频壁纸、在线壁纸（4.4 缺相关接口），其余全保留 |
 
 两个版本签名一致，可互相覆盖安装不丢设置。
 
@@ -110,8 +157,8 @@ adb shell settings put secure accessibility_enabled 1
 
 ```bash
 adb connect <电视IP>:5555
-adb install -r CleanYourTV-Launcher-universal.apk
-adb shell cmd package set-home-activity --user 0 com.gathin.tvhome/.MainActivity
+adb install -r GlassTV-Launcher-universal.apk
+adb shell cmd package set-home-activity --user 0 com.glasstv.tvhome/.MainActivity
 ```
 
 按遥控器 Home 键，看到新桌面就成了。
@@ -121,7 +168,7 @@ adb shell cmd package set-home-activity --user 0 com.gathin.tvhome/.MainActivity
 小米用户强烈建议开——不然待机后可能回到 PatchWall：
 
 ```bash
-adb shell settings put secure enabled_accessibility_services com.gathin.tvhome/com.gathin.tvhome.HomeGuardService
+adb shell settings put secure enabled_accessibility_services com.glasstv.tvhome/com.glasstv.tvhome.HomeGuardService
 adb shell settings put secure accessibility_enabled 1
 ```
 
@@ -129,18 +176,38 @@ adb shell settings put secure accessibility_enabled 1
 
 ```bash
 adb shell cmd package set-home-activity --user 0 <原桌面包名>/.<原桌面Activity>
-adb shell pm uninstall com.gathin.tvhome
+adb shell pm uninstall com.glasstv.tvhome
 ```
 
 不知道原桌面包名？装之前先记一下：`adb shell cmd package resolve-activity -c android.intent.category.HOME -a android.intent.action.MAIN`
 
+## 从旧版（CleanYourTV 3.x）升级
+
+4.0.0 换了包名，所以是**并行安装**，两个桌面可以同时存在：
+
+```bash
+adb install -r GlassTV-Launcher-universal.apk
+adb shell cmd package set-home-activity --user 0 com.glasstv.tvhome/.MainActivity
+```
+
+确认新版正常后，再卸载旧版：
+
+```bash
+adb uninstall com.gathin.tvhome
+```
+
+旧版的桌面排序、壁纸选择不会自动迁移（存在各自的私有目录里），需要在 GlassTV 里重新设一次。
+
 ## 常见问题
 
 **装完按 Home 没反应 / 又回到原桌面？**
-跑一次 `adb shell cmd package set-home-activity --user 0 com.gathin.tvhome/.MainActivity`。小米装新 App 后默认 Home 会被重置，这是正常现象。开了桌面守护就不会再跑丢。
+跑一次 `adb shell cmd package set-home-activity --user 0 com.glasstv.tvhome/.MainActivity`。小米装新 App 后默认 Home 会被重置，这是正常现象。开了桌面守护就不会再跑丢。
 
 **待机后醒来变回小米桌面？**
-开桌面守护（上面第三步）。小米待机会强杀第三方 App，守护会在原生桌面冒头时把 CleanYourTV 拉回来。
+开桌面守护（上面第三步）。小米待机会强杀第三方 App，守护会在原生桌面冒头时把 GlassTV 拉回来。
+
+**天气不显示 / 城市不对？**
+桌面设置 → 时间与天气 → 天气城市，填中文城市名（填英文会显示英文，因为天气接口返回的是拼音）；留空则自动定位，需要给应用位置权限。
 
 **电视上没有应用详情页/卸载不了 App？**
 国行小米阉割了标准应用详情 Intent。桌面里的「管理/卸载」已做适配：自动跳小米电视管家的应用管理页。
@@ -157,6 +224,21 @@ QQ 音乐、夸克这类 App 没做 TV banner，桌面只能显示图标，这�
 ## 📢 电视去广告库（174 机型）
 
 仓库自带 [`debloat/`](debloat/) 目录：**174 个电视/盒子/投影机型**的去广告清单，每条注明这个包是干什么的、停用后失去什么。**只停用、不卸载，随时一键还原。**详见 [debloat/README.md](debloat/README.md)。
+
+## 构建
+
+```bash
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+export PATH=$JAVA_HOME/bin:$PATH
+
+cd launcher
+./gradlew assembleRelease                      # 通用版（minSdk 21）
+./gradlew assembleRelease -PliteBuild=true     # 4.4 精简版（minSdk 19）
+```
+
+产物：`launcher/app/build/outputs/apk/release/app-release.apk`。
+
+> 必须联网构建：快传二维码依赖 `com.google.zxing:core`，本地无缓存时 `--offline` 会直接失败。
 
 ## 致谢
 

@@ -47,7 +47,7 @@ TV_HOST=192.168.x.x tools/restore.sh examples/xiaomi-mitv-axso0/debloat.txt
 
 把下面这段话直接复制粘贴给任意 AI 机器人（连同本仓库地址），它就能帮你完成整个去广告流程：
 
-> 请克隆 https://github.com/jichun29/cleanyourtv-k 仓库，查看 debloat/ 目录。我的电视型号是【在这里填你的型号，比如「小米 Mi TV 4A」或「TCL 55C725」】，电视 IP 是【填电视 IP】。请：① 在 debloat/examples/ 里找到与我的机型最匹配的 debloat.txt 清单（没有精确匹配时选同品牌、同芯片平台、Android 版本最接近的）；② 逐条向我解释清单里每个包的作用和停用后的影响；③ 经我确认后，用 debloat/tools/disable.sh 通过 ADB 执行停用；④ 停用后逐项验证包状态（pm list packages -d），最后告诉我重启电视确认效果。注意：只停用、绝不卸载（pm uninstall）；如果遇到 setupwraith 之类与首次开机向导/Wi-Fi 保存相关的包，先警告我再决定。
+> 请克隆 https://github.com/jichun29/glasstv 仓库，查看 debloat/ 目录。我的电视型号是【在这里填你的型号，比如「小米 Mi TV 4A」或「TCL 55C725」】，电视 IP 是【填电视 IP】。请：① 在 debloat/examples/ 里找到与我的机型最匹配的 debloat.txt 清单（没有精确匹配时选同品牌、同芯片平台、Android 版本最接近的）；② 逐条向我解释清单里每个包的作用和停用后的影响；③ 经我确认后，用 debloat/tools/disable.sh 通过 ADB 执行停用；④ 停用后逐项验证包状态（pm list packages -d），最后告诉我重启电视确认效果。注意：只停用、绝不卸载（pm uninstall）；如果遇到 setupwraith 之类与首次开机向导/Wi-Fi 保存相关的包，先警告我再决定。
 
 Windows 用户把指令词里的 `tools/disable.sh` 换成等价的 adb 命令逐条执行即可（脚本内容很简单，AI 看得懂）。
 

@@ -26,7 +26,7 @@
     <string name="vpn">VPN</string>
     <string name="vpn_off">ה־VPN כבוי</string>
     <string name="home_settings">מסך הבית המוגדר כברירת מחדל</string>
-    <string name="home_settings_help">כדי להפסיק להשתמש ב־CleanYourTV כמסך הבית, יש לבחור במסך הבית המקורי. כדי לחזור, יש לבחור ב־CleanYourTV. מפעיל מסך הבית המקורי חייב להיות פעיל, והטלוויזיה צריכה לתמוך בבחירת מסך בית. אם הוא הושבת, יש להפעיל תחילה את סקריפט השחזור.</string>
+    <string name="home_settings_help">כדי להפסיק להשתמש ב־GlassTV כמסך הבית, יש לבחור במסך הבית המקורי. כדי לחזור, יש לבחור ב־GlassTV. מפעיל מסך הבית המקורי חייב להיות פעיל, והטלוויזיה צריכה לתמוך בבחירת מסך בית. אם הוא הושבת, יש להפעיל תחילה את סקריפט השחזור.</string>
     <string name="launcher_settings">הגדרות מסך הבית</string>
     <string name="columns_label">אפליקציות בשורה</string>
     <string name="animations_state">הנפשות: %1$s</string>

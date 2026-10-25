@@ -53,7 +53,7 @@ Before the handover, the HOME candidates were:
 - `com.android.tv.settings/.system.FallbackHome`: priority **-1000**.
 
 The reference APK installed and its `MainActivity` started with `Status: ok`.
-However, `cmd package set-home-activity --user 0 com.gathin.tvhome/.MainActivity`
+However, `cmd package set-home-activity --user 0 com.glasstv.tvhome/.MainActivity`
 reported `Success` while `resolve-activity` still returned launcherx at priority 2.
 Always query HOME and test the real remote; a successful setter is not enough.
 
@@ -69,11 +69,11 @@ disabled packages** (commands below run in the TV's ADB shell):
 ```sh
 pm disable-user --user 0 com.google.android.tungsten.setupwraith
 pm disable-user --user 0 com.google.android.apps.tv.launcherx
-cmd package set-home-activity --user 0 com.gathin.tvhome/.MainActivity
+cmd package set-home-activity --user 0 com.glasstv.tvhome/.MainActivity
 cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME
 ```
 
-HOME then resolved to `com.gathin.tvhome/.MainActivity` at priority 0.
+HOME then resolved to `com.glasstv.tvhome/.MainActivity` at priority 0.
 An injected Home key returned to it, and the owner confirmed that the physical
 remote's Home and directional buttons worked. No accessibility helper or
 runtime location grant was enabled for this installation.
@@ -88,7 +88,7 @@ these defaults apply to another TV.
 ## Live TV config: distinguish the player from its input services
 
 Use this theme overlay in the launcher's external files directory
-(`/sdcard/Android/data/com.gathin.tvhome/files/config.json`), or the equivalent
+(`/sdcard/Android/data/com.glasstv.tvhome/files/config.json`), or the equivalent
 `config.xml` values:
 
 ```json
@@ -123,7 +123,7 @@ Do not infer physical connector count from every input in `dumpsys tv_input`.
   These were view-only checks, not network changes.
 - The Home handover, original-Home restoration and re-application were tested.
   Restarting the launcher process returned to the custom Home. The crash-buffer
-  check after the UI tests contained no entry for `com.gathin.tvhome`.
+  check after the UI tests contained no entry for `com.glasstv.tvhome`.
 - All user-installed apps were retained. Firmware-update, Chromecast, voice,
   Bluetooth/remote, TV-input, network and other vendor services were not disabled.
   Their individual functionality was not all re-tested; no DNS changes were made.

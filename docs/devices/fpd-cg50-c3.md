@@ -138,7 +138,7 @@ auto-start block does not apply to this firmware.
 - Assistant, Chromecast, Netflix: kept by choice.
 
 The active screensaver was `com.google.android.apps.tv.dreamx`, so the list disables it and the launcher
-supplies `com.gathin.tvhome/.ClockDream` instead. No manufacturer OTA package was found on the box,
+supplies `com.glasstv.tvhome/.ClockDream` instead. No manufacturer OTA package was found on the box,
 so nothing in the list is about firmware updates.
 
 AdGuard Private DNS was set up alongside the debloat and YouTube still loads and plays; its ads stay,

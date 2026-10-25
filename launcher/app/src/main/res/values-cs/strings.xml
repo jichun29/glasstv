@@ -23,7 +23,7 @@
     <string name="vpn">VPN</string>
     <string name="vpn_off">VPN vypnutá</string>
     <string name="home_settings">Výchozí domovská obrazovka</string>
-    <string name="home_settings_help">Vyberte původní domovskou obrazovku, pokud už nechcete CleanYourTV používat jako domovskou, nebo CleanYourTV, pokud se k ní chcete vrátit. Původní launcher musí být zapnutý a televize musí nabízet výběr domovské obrazovky. Pokud byl vypnutý, spusťte nejdřív skript pro obnovení.</string>
+    <string name="home_settings_help">Vyberte původní domovskou obrazovku, pokud už nechcete GlassTV používat jako domovskou, nebo GlassTV, pokud se k ní chcete vrátit. Původní launcher musí být zapnutý a televize musí nabízet výběr domovské obrazovky. Pokud byl vypnutý, spusťte nejdřív skript pro obnovení.</string>
     <string name="launcher_settings">Nastavení domovské obrazovky</string>
     <string name="columns_label">Aplikací v řádku</string>
     <string name="animations_state">Animace: %1$s</string>

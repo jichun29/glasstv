@@ -15,7 +15,7 @@ the steps to reproduce it, and what an attacker could do with it.
 
 ## What counts
 
-- The launcher (`com.gathin.tvhome`) doing something it shouldn't: reaching the network, exposing
+- The launcher (`com.glasstv.tvhome`) doing something it shouldn't: reaching the network, exposing
   data to other apps, or being made to open something it shouldn't.
 - The tools (`tools/tv.py`, `disable.sh`, `restore.sh`, `theme.sh`, `recovery.py`) running commands
   on a device or computer they weren't pointed at, or mishandling paths and input.

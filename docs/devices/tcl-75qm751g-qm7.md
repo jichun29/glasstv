@@ -51,7 +51,7 @@ The first `launcher/build-and-install.sh` run rolled back as designed: Home went
 setupwraith because the Wi-Fi network saved during setup belonged to it. The TV was on Ethernet and
 that changed nothing: the guard asks who owns the saved network, not which interface is up. Only
 after forgetting that network in Settings did the second run disable setupwraith and make
-`com.gathin.tvhome` Home.
+`com.glasstv.tvhome` Home.
 
 So on a set like this, decide before the install, not after the rollback:
 

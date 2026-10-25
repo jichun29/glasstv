@@ -25,7 +25,7 @@ TV_HOST=<tv-ip> tools/theme.sh <your theme folder>      # with the config.json b
 
 Set the screensaver before dreamx goes:
 `tools/tv.py 'settings put secure screensaver_components com.android.dreams.basic/.Colors'`
-(or `com.gathin.tvhome/.ClockDream`). Then check that the remote-button service is **bound**, not just enabled
+(or `com.glasstv.tvhome/.ClockDream`). Then check that the remote-button service is **bound**, not just enabled
 (see Quirks): `tools/tv.py 'dumpsys accessibility' | grep 'Bound services'`.
 
 ## Undo
@@ -115,7 +115,7 @@ After the changes, launcher with the aurora wallpaper, 4 per row:
 | RAM (2 GB) | ~1.55 GB | ~490 MB available |
 | Swap (1 GB) | ~130 MB | ~900 MB |
 | `/data` (10 GB) | 2.5 GB | 7.4 GB |
-| Launcher (`com.gathin.tvhome`) | ~78 MB PSS | |
+| Launcher (`com.glasstv.tvhome`) | ~78 MB PSS | |
 
 Before the changes, 370 MB was available, but that was read at a different moment, so it is not a clean
 before/after figure. CPU was not measured at idle: the reading taken 2 minutes after boot (~16%) only shows apps
@@ -125,7 +125,7 @@ starting.
 
 - **The button service can stay enabled but unbound** after the launcher is reinstalled and the theme pushed:
   `enabled_accessibility_services` lists it, and `dumpsys accessibility` shows `Bound services:{}`. Android binds
-  it again only when the list changes, so set it to `""` and then back to `com.gathin.tvhome/.HomeKeyService`.
+  it again only when the list changes, so set it to `""` and then back to `com.glasstv.tvhome/.HomeKeyService`.
 - **Sideloading works.** Every user-installed app here is a split APK. Reinstalling one with an install session
   that writes all its parts (`pm install-create -r` / `install-write` / `install-commit`) succeeded, and so did
   the launcher. The launcher's base64 transfer passed its md5 check here, unlike on the 43C645.

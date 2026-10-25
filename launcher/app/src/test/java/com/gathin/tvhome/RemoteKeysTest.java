@@ -1,4 +1,4 @@
-package com.gathin.tvhome;
+package com.glasstv.tvhome;
 
 import java.util.Map;
 import org.junit.Test;

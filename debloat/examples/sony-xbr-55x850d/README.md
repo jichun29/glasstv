@@ -26,7 +26,7 @@ was changed; no launcher Java code was changed:
 **Keep `com.sony.dtv.tvx` enabled. It handles HDMI playback as well as Live TV.**
 Select the Roku through the real Inputs menu rather than copying another TV's
 hardware input ID. The stock Home package is `com.google.android.tvlauncher`;
-the replacement is `com.gathin.tvhome`.
+the replacement is `com.glasstv.tvhome`.
 
 Build, install, launch and verify the replacement Home while stock Home is still
 enabled. Only then complete the Home handover and disable the stock launcher.

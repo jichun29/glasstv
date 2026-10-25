@@ -1,4 +1,4 @@
-package com.gathin.tvhome;
+package com.glasstv.tvhome;
 
 import org.junit.After;
 import org.junit.Before;
@@ -58,7 +58,7 @@ public class CardFeatureTest {
         assertFalse(CardFeature.working());
         CardFeature.reset();
         assertEquals("fallback", CardFeature.run(() -> {
-            throw new NoClassDefFoundError("com.gathin.tvhome.Cards");
+            throw new NoClassDefFoundError("com.glasstv.tvhome.Cards");
         }, "fallback"));
         assertFalse(CardFeature.working());
         assertEquals(2, reported.size());

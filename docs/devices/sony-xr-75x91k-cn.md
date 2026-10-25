@@ -31,11 +31,11 @@ com.dangbei.TVHomeLauncher/com.dangbei.leard.leradlauncher.ui.sony.main.MainActi
 ```
 
 The reference launcher's APK installed successfully and an explicit start of
-`com.gathin.tvhome/.MainActivity` completed with `Status: ok`. These commands
+`com.glasstv.tvhome/.MainActivity` completed with `Status: ok`. These commands
 were then used in the TV's ADB shell:
 
 ```sh
-cmd package set-home-activity --user 0 com.gathin.tvhome/.MainActivity
+cmd package set-home-activity --user 0 com.glasstv.tvhome/.MainActivity
 cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME
 input keyevent 3
 ```

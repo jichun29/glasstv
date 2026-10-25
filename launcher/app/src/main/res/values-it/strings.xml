@@ -21,7 +21,7 @@
     <string name="dream_name">Orologio</string>
     <string name="vpn_off">VPN disattivata</string>
     <string name="home_settings">Scegli la home predefinita</string>
-    <string name="home_settings_help">Seleziona la home originale per smettere di usare CleanYourTV come Home, oppure CleanYourTV per tornare indietro. Il launcher originale deve essere attivo e la TV deve offrire la scelta della home; se era disattivato, usa prima lo script di ripristino.</string>
+    <string name="home_settings_help">Seleziona la home originale per smettere di usare GlassTV come Home, oppure GlassTV per tornare indietro. Il launcher originale deve essere attivo e la TV deve offrire la scelta della home; se era disattivato, usa prima lo script di ripristino.</string>
     <string name="launcher_settings">Impostazioni del launcher</string>
     <string name="columns_label">App per riga</string>
     <string name="rows_below_dock_label">Righe sotto il dock</string>

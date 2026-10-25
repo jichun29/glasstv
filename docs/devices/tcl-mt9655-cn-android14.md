@@ -89,7 +89,7 @@ Building `launcher/` from source works (`./gradlew assembleRelease` with JDK 17 
 394 KB APK), but installing it fails at the verifier:
 
 ```
-verifier: signature not match for tcl com.gathin.tvhome, will not be installed !
+verifier: signature not match for tcl com.glasstv.tvhome, will not be installed !
 ```
 
 Driving the installer UI over adb gets further than `adb install` — `file://` URIs are refused on

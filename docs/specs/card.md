@@ -21,9 +21,9 @@ filter (the one the launcher shows as a tile):
     </intent-filter>
     <intent-filter>
         <action android:name="android.intent.action.MAIN" />
-        <category android:name="com.gathin.tvhome.category.DOCK_CARD" />
+        <category android:name="com.glasstv.tvhome.category.DOCK_CARD" />
     </intent-filter>
-    <meta-data android:name="com.gathin.tvhome.card" android:resource="@xml/module_card" />
+    <meta-data android:name="com.glasstv.tvhome.card" android:resource="@xml/module_card" />
 </activity>
 ```
 
@@ -104,7 +104,7 @@ any violation drops that one card, with a log line and no other effect.
 ## Launcher behaviour
 
 1. Discovery. Every time the home screen comes to the front, the launcher asks the package manager
-   for activities with `MAIN` + `com.gathin.tvhome.category.DOCK_CARD` (a package manager query,
+   for activities with `MAIN` + `com.glasstv.tvhome.category.DOCK_CARD` (a package manager query,
    no polling, no services, no network). For each one it checks the activity, reads the XML through the package
    manager, applies the rules above and computes the signer digest. Every card is read inside its
    own error boundary.

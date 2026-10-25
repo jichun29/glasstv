@@ -19,7 +19,7 @@ The generic About-screen model is not the retail model. Match the firmware ident
 
 ## HOME handover observed on this unit
 
-The original HOME activity was `com.google.android.tvlauncher/.MainActivity`. On this firmware, `cmd package set-home-activity` reported success while the stock launcher was still enabled, but HOME continued to resolve to the stock launcher. After the replacement launcher was installed and the stock launcher was disabled for user 0, HOME resolved to `com.gathin.tvhome/.MainActivity` and the launcher was verified running.
+The original HOME activity was `com.google.android.tvlauncher/.MainActivity`. On this firmware, `cmd package set-home-activity` reported success while the stock launcher was still enabled, but HOME continued to resolve to the stock launcher. After the replacement launcher was installed and the stock launcher was disabled for user 0, HOME resolved to `com.glasstv.tvhome/.MainActivity` and the launcher was verified running.
 
 This records one successful handover on this unit; it does not establish that every Android 11 Philips TV needs the same sequence. The launcher trial used source checkout `022c57da7c4f07466141229cb5625f6ae4fd7ba0`, so it is not validation of the current upstream main branch.
 

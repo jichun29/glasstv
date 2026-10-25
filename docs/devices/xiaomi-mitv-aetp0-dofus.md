@@ -6,7 +6,7 @@ This is a launcher-only record; no debloat list was applied.
 
 ## What failed and why
 
-The standard `com.gathin.tvhome` APK opened normally, but setting it as Home reported
+The standard `com.glasstv.tvhome` APK opened normally, but setting it as Home reported
 `Success` while HOME still resolved to Xiaomi. Disabling Xiaomi Home selected
 `com.android.tv.settings/.system.FallbackHome`; re-enabling Xiaomi restored normal use.
 An accessibility redirect worked in the current session, but its enabled-service entry
@@ -39,19 +39,19 @@ PY=tools/venv/bin/python
 (cd launcher && ./gradlew assembleRelease -PlauncherApplicationId=com.ts.launcher)
 "$PY" -I tools/b64push.py launcher/app/build/outputs/apk/release/app-release.apk /data/local/tmp/tvhome-allowlist.apk
 "$PY" -I tools/tv.py 'pm install -r /data/local/tmp/tvhome-allowlist.apk'
-"$PY" -I tools/tv.py 'am start -W -n com.ts.launcher/com.gathin.tvhome.MainActivity'
+"$PY" -I tools/tv.py 'am start -W -n com.ts.launcher/com.glasstv.tvhome.MainActivity'
 ```
 
 After inspecting the new screen, select and verify Home:
 
 ```bash
-"$PY" -I tools/tv.py 'cmd package set-home-activity --user 0 com.ts.launcher/com.gathin.tvhome.MainActivity'
+"$PY" -I tools/tv.py 'cmd package set-home-activity --user 0 com.ts.launcher/com.glasstv.tvhome.MainActivity'
 "$PY" -I tools/tv.py 'cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME'
 ```
 
-The expected component is `com.ts.launcher/com.gathin.tvhome.MainActivity`. The Java
-namespace stays `com.gathin.tvhome`, so `com.ts.launcher/.MainActivity` is incorrect.
-The normal install/theme/restore scripts still target `com.gathin.tvhome`; use these
+The expected component is `com.ts.launcher/com.glasstv.tvhome.MainActivity`. The Java
+namespace stays `com.glasstv.tvhome`, so `com.ts.launcher/.MainActivity` is incorrect.
+The normal install/theme/restore scripts still target `com.glasstv.tvhome`; use these
 manual commands for this build. Its optional theme overlay belongs in
 `/sdcard/Android/data/com.ts.launcher/files/config.json`. The original installation and
 its configuration remain separate. Without the Gradle property, builds retain the

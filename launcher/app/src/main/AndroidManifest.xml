@@ -37,7 +37,7 @@
         </intent>
         <intent>
             <action android:name="android.intent.action.MAIN" />
-            <category android:name="com.gathin.tvhome.category.DOCK_CARD" />
+            <category android:name="com.glasstv.tvhome.category.DOCK_CARD" />
         </intent>
         <!-- China-market MIUI TV firmware: the Settings and Wi-Fi pills fall back to Xiaomi's settings app. -->
         <package android:name="com.xiaomi.mitv.settings" />
@@ -146,7 +146,7 @@
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
 
         <!-- Screensaver: pick it in Settings, or `settings put secure screensaver_components
-             com.gathin.tvhome/.ClockDream` over adb. -->
+             com.glasstv.tvhome/.ClockDream` over adb. -->
         <service
             android:name=".ClockDream"
             android:label="@string/dream_name"
@@ -194,7 +194,7 @@
 
         <!-- 桌面守护（2026-10-23 移植自 aerial-tv）：小米待机强杀后把桌面拉回来。只盯窗口切换，
              不读内容不拦按键。装上后要 adb 开一次：
-             settings put secure enabled_accessibility_services com.gathin.tvhome/.HomeGuardService -->
+             settings put secure enabled_accessibility_services com.glasstv.tvhome/.HomeGuardService -->
         <service
             android:name=".HomeGuardService"
             android:label="@string/home_guard_name"

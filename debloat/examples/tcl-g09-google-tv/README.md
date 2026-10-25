@@ -21,7 +21,7 @@ then `build-and-install.sh` starts the new launcher and only then disables launc
 TV_HOST=<tv-ip> tools/disable.sh examples/tcl-g09-google-tv/debloat.txt
 INPUT_KEY_SERVICE=1 TV_HOST=<tv-ip> launcher/build-and-install.sh
 TV_HOST=<tv-ip> tools/theme.sh examples/tcl-g09-google-tv
-TV_HOST=<tv-ip> tools/venv/bin/python -I tools/tv.py 'settings put secure screensaver_components com.gathin.tvhome/.ClockDream'
+TV_HOST=<tv-ip> tools/venv/bin/python -I tools/tv.py 'settings put secure screensaver_components com.glasstv.tvhome/.ClockDream'
 ```
 
 The last line swaps the Ambient screensaver (`dreamx`, disabled by the list) for the launcher's Clock.

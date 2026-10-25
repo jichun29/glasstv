@@ -24,7 +24,7 @@
     <string name="vpn">VPN</string>
     <string name="vpn_off">VPN pois päältä</string>
     <string name="home_settings">Valitse oletuskotinäkymä</string>
-    <string name="home_settings_help">Valitse alkuperäinen kotinäkymä, jos haluat lopettaa CleanYourTV:n käytön kotinäkymänä, tai CleanYourTV palataksesi siihen. Alkuperäisen käynnistimen on oltava käytössä ja television on tarjottava kotinäkymän valinta. Jos käynnistin on poistettu käytöstä, aja ensin palautusskripti.</string>
+    <string name="home_settings_help">Valitse alkuperäinen kotinäkymä, jos haluat lopettaa GlassTV:n käytön kotinäkymänä, tai GlassTV palataksesi siihen. Alkuperäisen käynnistimen on oltava käytössä ja television on tarjottava kotinäkymän valinta. Jos käynnistin on poistettu käytöstä, aja ensin palautusskripti.</string>
     <string name="launcher_settings">Käynnistimen asetukset</string>
     <string name="columns_label">Sovelluksia rivillä</string>
     <string name="animations_state">Animaatiot: %1$s</string>

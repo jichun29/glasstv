@@ -22,9 +22,9 @@ On the activity that already has the `LEANBACK_LAUNCHER` filter, add a second fi
     </intent-filter>
     <intent-filter>
         <action android:name="android.intent.action.MAIN" />
-        <category android:name="com.gathin.tvhome.category.DOCK_CARD" />
+        <category android:name="com.glasstv.tvhome.category.DOCK_CARD" />
     </intent-filter>
-    <meta-data android:name="com.gathin.tvhome.card" android:resource="@xml/module_card" />
+    <meta-data android:name="com.glasstv.tvhome.card" android:resource="@xml/module_card" />
 </activity>
 ```
 

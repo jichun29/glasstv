@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 标签页背景（2026-10-25 K）：未选中透明；焦点给 2dp 白描边（遥控器指在哪个标签一眼可辨，
+     不能只靠很淡的底色——实测电视上几乎看不出来）。 -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#26FFFFFF" />
+            <corners android:radius="10dp" />
+            <stroke android:width="2dp" android:color="#FFFFFFFF" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#00000000" />
+            <corners android:radius="10dp" />
+        </shape>
+    </item>
+</selector>

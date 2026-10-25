@@ -28,31 +28,40 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * 壁纸与屏保（2026-10-25 K）。
+ * 壁纸与屏保（2026-10-25 K 定稿，v4.0.2）。
  *
- * 控制中心从 9 个入口收到 6 个，原来分开的「壁纸」「屏保」两页合成这一页：
- *   左半屏 壁纸：分区缩略图网格，方向键挑选、确定应用（轮播 / 必应每日在上一行开关里）
- *   右半屏 屏保：时间 / 必应壁纸 两张卡（选哪张就是哪套）+ 屏保开关 + 换图间隔 + 预览
+ * 顶部标签页「壁纸 | 屏保」，默认停在壁纸页，两页各自占满整屏（不是左右分栏）：
+ *   壁纸页：轮播 / 必应每日两个开关 + 4 列缩略图网格，方向键挑选、确定应用
+ *   屏保页：时间 / 必应壁纸 两张卡（选哪张就是哪套）+ 屏保开关 + 换图间隔 + 预览
  *
- * 为什么自己写焦点导航：电视上 ScrollView + 网格的默认焦点搜索会乱跑（左右窜到右半屏、
- * 上下穿出滚动区）。这里按「视觉行列」算目标格，走到边界就吃掉按键。
- * 两把设置写共享 prefs（wallpapers / launcher_settings），桌面回前台自己重读，不用回传结果。
+ * 焦点规则：焦点在标签行时左右键切页；进了内容区左右键归内容自己用（网格选图、
+ * 卡片/分段之间移动）。上键一律回标签行，所以遥控器永远走得出去。
+ * 为什么自己算焦点：电视上 ScrollView + 网格的默认焦点搜索会乱跑（左右窜出滚动区、
+ * 上下穿到别的控件），这里按「视觉行列」找目标格，到边界就吃掉按键。
+ * 设置写共享 prefs（wallpapers / launcher_settings），桌面回前台自己重读，不用回传结果。
  */
 public final class PersonalizeActivity extends Activity {
 
     private static final int[] INTERVAL_MINS = {0, 60, 1440};
-    private static final int TILE_W = 132, TILE_H = 82, TILE_GAP = 8;
+    /** 4 列 × 200dp + 3×12dp = 836 ≤ 864 的可用宽度。 */
+    private static final int TILE_W = 200, TILE_H = 112, TILE_GAP = 12;
     private static final int COLUMNS = 4;
 
     private final ExecutorService io = Executors.newSingleThreadExecutor();
     private SharedPreferences choices;      // launcher_settings：屏保
     private SharedPreferences wall;         // wallpapers：壁纸
 
+    private View tabWallpaper, tabSaver;
+    private TextView tabWallpaperText, tabSaverText;
+    private View tabWallpaperLine, tabSaverLine;
+    private View pageWallpaper, pageSaver;
+
     private TextView wallpaperMode;
     private TextView rotatePill;
     private TextView bingPill;
     private TextView idlePill;
-    private TextView status;
+    private TextView status;          // 壁纸页底部状态行
+    private TextView saverStatus;     // 屏保页底部状态行
 
     private FrameLayout saverClock;
     private FrameLayout saverBing;
@@ -77,6 +86,9 @@ public final class PersonalizeActivity extends Activity {
     private int index;
     private float density;
 
+    /** 当前在壁纸页（true）还是屏保页（false）。默认壁纸页。 */
+    private boolean wallpaperPage = true;
+
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
@@ -85,11 +97,21 @@ public final class PersonalizeActivity extends Activity {
         choices = getSharedPreferences(Config.SETTINGS_NAME, MODE_PRIVATE);
         wall = getSharedPreferences("wallpapers", MODE_PRIVATE);
 
+        tabWallpaper = findViewById(R.id.pzTabWallpaper);
+        tabSaver = findViewById(R.id.pzTabSaver);
+        tabWallpaperText = findViewById(R.id.pzTabWallpaperText);
+        tabSaverText = findViewById(R.id.pzTabSaverText);
+        tabWallpaperLine = findViewById(R.id.pzTabWallpaperLine);
+        tabSaverLine = findViewById(R.id.pzTabSaverLine);
+        pageWallpaper = findViewById(R.id.pzPageWallpaper);
+        pageSaver = findViewById(R.id.pzPageSaver);
+
         wallpaperMode = findViewById(R.id.pzWallpaperMode);
         rotatePill = findViewById(R.id.pzRotate);
         bingPill = findViewById(R.id.pzBingDaily);
         idlePill = findViewById(R.id.pzIdleSwitch);
         status = findViewById(R.id.pzStatus);
+        saverStatus = findViewById(R.id.pzSaverStatus);
         saverClock = findViewById(R.id.pzSaverClock);
         saverBing = findViewById(R.id.pzSaverBing);
         clockCaption = findViewById(R.id.pzClockCaption);
@@ -106,13 +128,58 @@ public final class PersonalizeActivity extends Activity {
 
         readWallpaperState();
         buildWallpaperGrid();
-        wireTopRow();
-        wireSaver();
+        wireTabs();
+        wireWallpaperPage();
+        wireSaverPage();
         refreshScreensaver();
         loadBingThumb();
 
-        if (!tiles.isEmpty()) tiles.get(firstFocusTile()).requestFocus();
-        status.setText("方向键选壁纸，确定应用　·　右侧是屏保");
+        // 默认停在壁纸页，焦点落在「壁纸」标签上：第一下左右就能切到屏保页
+        showPage(true, false);
+        tabWallpaper.requestFocus();
+    }
+
+    // ---- 标签页 ------------------------------------------------------------------
+
+    private void wireTabs() {
+        tabWallpaper.setOnClickListener(v -> showPage(true, true));
+        tabSaver.setOnClickListener(v -> showPage(false, true));
+
+        for (final boolean isWallpaper : new boolean[]{true, false}) {
+            final View tab = isWallpaper ? tabWallpaper : tabSaver;
+            tab.setOnKeyListener((v, key, event) -> {
+                if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
+                if (key == KeyEvent.KEYCODE_DPAD_LEFT || key == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                    // 只有两个标签：左右都切到另一边，切完焦点跟过去
+                    boolean goWallpaper = !wallpaperPage;
+                    showPage(goWallpaper, false);
+                    (goWallpaper ? tabWallpaper : tabSaver).requestFocus();
+                    return true;
+                }
+                if (key == KeyEvent.KEYCODE_DPAD_DOWN) {
+                    if (wallpaperPage) rotatePill.requestFocus();
+                    else idlePill.requestFocus();
+                    return true;
+                }
+                return key == KeyEvent.KEYCODE_DPAD_UP;
+            });
+        }
+    }
+
+    /** 切页：只改可见性 + 标签的下划线与字色，焦点交给调用方决定。 */
+    private void showPage(boolean showWallpaper, boolean focusContent) {
+        wallpaperPage = showWallpaper;
+        pageWallpaper.setVisibility(showWallpaper ? View.VISIBLE : View.GONE);
+        pageSaver.setVisibility(showWallpaper ? View.GONE : View.VISIBLE);
+
+        tabWallpaperText.setTextColor(showWallpaper ? 0xFFFFFFFF : 0x80FFFFFF);
+        tabSaverText.setTextColor(showWallpaper ? 0x80FFFFFF : 0xFFFFFFFF);
+        tabWallpaperLine.setVisibility(showWallpaper ? View.VISIBLE : View.INVISIBLE);
+        tabSaverLine.setVisibility(showWallpaper ? View.INVISIBLE : View.VISIBLE);
+
+        if (!focusContent) return;
+        if (showWallpaper) focusFirstGridTile();
+        else saverClock.requestFocus();
     }
 
     // ---- 壁纸：状态 + 网格 -------------------------------------------------------
@@ -154,10 +221,10 @@ public final class PersonalizeActivity extends Activity {
             TextView head = new TextView(this);
             head.setText(WallpaperController.groupName(g));
             head.setTextColor(0x66FFFFFF);
-            head.setTextSize(11f);
+            head.setTextSize(12f);
             if (android.os.Build.VERSION.SDK_INT >= 21) head.setLetterSpacing(0.12f);
             LinearLayout.LayoutParams hp = new LinearLayout.LayoutParams(-1, -2);
-            hp.topMargin = Math.round(dp(g == 0 ? 12 : 16));
+            hp.topMargin = Math.round(dp(g == 0 ? 12 : 18));
             hp.bottomMargin = Math.round(dp(6));
             column.addView(head, hp);
 
@@ -200,18 +267,18 @@ public final class PersonalizeActivity extends Activity {
         View scrim = new View(this);
         scrim.setBackground(new GradientDrawable(GradientDrawable.Orientation.BOTTOM_TOP,
                 new int[]{0xCC000000, 0x00000000}));
-        FrameLayout.LayoutParams sp = new FrameLayout.LayoutParams(-1, Math.round(dp(30)), Gravity.BOTTOM);
+        FrameLayout.LayoutParams sp = new FrameLayout.LayoutParams(-1, Math.round(dp(36)), Gravity.BOTTOM);
         sp.setMargins(m, 0, m, m);
         card.addView(scrim, sp);
 
         TextView label = new TextView(this);
         label.setText(caption);
         label.setTextColor(0xFFFFFFFF);
-        label.setTextSize(11f);
+        label.setTextSize(12f);
         label.setSingleLine(true);
         label.setEllipsize(android.text.TextUtils.TruncateAt.END);
         FrameLayout.LayoutParams np = new FrameLayout.LayoutParams(-1, -2, Gravity.BOTTOM);
-        np.setMargins(Math.round(dp(7)), 0, Math.round(dp(7)), Math.round(dp(7)));
+        np.setMargins(Math.round(dp(9)), 0, Math.round(dp(9)), Math.round(dp(9)));
         card.addView(label, np);
 
         parent.addView(card);
@@ -241,7 +308,6 @@ public final class PersonalizeActivity extends Activity {
             status.setText(choice < 0
                     ? "默认壁纸：纯黑背景 + 应用主题色光晕　确定应用"
                     : WallpaperController.nameOf(choice) + "　确定应用");
-            card.setBackground(bg(true, isChecked(choice)));
         });
         card.setOnClickListener(v -> applyWallpaper(choice));
         card.setOnKeyListener((v, key, event) -> {
@@ -262,19 +328,16 @@ public final class PersonalizeActivity extends Activity {
             int target = at + 1;
             if (target < tiles.size() && cells.get(target)[0] == cell[0]) {
                 tiles.get(target).requestFocus();
-                return true;
             }
-            // 本行到头 → 进右半屏的屏保卡片（两栏布局的自然走法）
-            saverClock.requestFocus();
-            return true;
+            return true;   // 本行到头就吃掉，不窜到别处
         }
         if (key == KeyEvent.KEYCODE_DPAD_UP) {
-            if (cell[0] == 0) { rotatePill.requestFocus(); return true; }
+            if (cell[0] == 0) { tabWallpaper.requestFocus(); return true; }   // 第一行往上回标签
             focusRow(cell[0] - 1, cell[1]);
             return true;
         }
         if (key == KeyEvent.KEYCODE_DPAD_DOWN) {
-            if (!focusRow(cell[0] + 1, cell[1])) saverClock.requestFocus();
+            focusRow(cell[0] + 1, cell[1]);   // 没有下一行就留在原地
             return true;
         }
         return false;
@@ -340,9 +403,9 @@ public final class PersonalizeActivity extends Activity {
         setResult(RESULT_OK);
     }
 
-    // ---- 上一行：壁纸轮播 / 必应每日 / 屏保开关 -------------------------------------
+    // ---- 壁纸页：轮播 / 必应每日两个开关 ------------------------------------------
 
-    private void wireTopRow() {
+    private void wireWallpaperPage() {
         rotatePill.setOnClickListener(v -> {
             if (useDefault) {
                 Toast.makeText(this, "先挑一张壁纸，再开轮播", Toast.LENGTH_SHORT).show();
@@ -356,19 +419,19 @@ public final class PersonalizeActivity extends Activity {
             setResult(RESULT_OK);
         });
         rotatePill.setOnFocusChangeListener((v, f) -> {
-            // 焦点态是白底，白字会看不见：焦点时文字转深色（2026-10-25 实测踩到）
+            // 焦点态是白底，白字会看不见：焦点时文字转深色（实测踩到）
             rotatePill.setTextColor(f ? 0xFF14171C : 0xFFFFFFFF);
             if (f) status.setText(rotating ? "关掉轮播就固定当前壁纸" : "开启后每 5 分钟换一张");
         });
         rotatePill.setOnKeyListener((v, key, event) -> {
             if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
             if (key == KeyEvent.KEYCODE_DPAD_DOWN) { focusFirstGridTile(); return true; }
-            if (key == KeyEvent.KEYCODE_DPAD_UP) return true;
+            if (key == KeyEvent.KEYCODE_DPAD_UP) { tabWallpaper.requestFocus(); return true; }
             if (key == KeyEvent.KEYCODE_DPAD_RIGHT && bingPill.getVisibility() == View.VISIBLE) {
                 bingPill.requestFocus();
                 return true;
             }
-            return key == KeyEvent.KEYCODE_DPAD_LEFT;
+            return key == KeyEvent.KEYCODE_DPAD_LEFT;   // 左边界：吃掉
         });
 
         bingPill.setOnClickListener(v -> toggleBingDaily());
@@ -380,29 +443,13 @@ public final class PersonalizeActivity extends Activity {
         bingPill.setOnKeyListener((v, key, event) -> {
             if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
             if (key == KeyEvent.KEYCODE_DPAD_DOWN) { focusFirstGridTile(); return true; }
-            if (key == KeyEvent.KEYCODE_DPAD_UP) return true;
+            if (key == KeyEvent.KEYCODE_DPAD_UP) { tabWallpaper.requestFocus(); return true; }
             if (key == KeyEvent.KEYCODE_DPAD_LEFT) { rotatePill.requestFocus(); return true; }
             return key == KeyEvent.KEYCODE_DPAD_RIGHT;
         });
 
-        idlePill.setOnClickListener(v -> {
-            choices.edit().putBoolean("idle_clock_enabled",
-                    !choices.getBoolean("idle_clock_enabled", true)).apply();
-            refreshScreensaver();
-            setResult(RESULT_OK);
-        });
-        idlePill.setOnFocusChangeListener((v, f) -> {
-            idlePill.setTextColor(f ? 0xFF14171C : 0xFFFFFFFF);
-            if (f) status.setText("关掉后待机再久也不进屏保");
-        });
-        idlePill.setOnKeyListener((v, key, event) -> {
-            if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
-            if (key == KeyEvent.KEYCODE_DPAD_DOWN) { saverClock.requestFocus(); return true; }
-            if (key == KeyEvent.KEYCODE_DPAD_LEFT) { saverBing.requestFocus(); return true; }
-            return key == KeyEvent.KEYCODE_DPAD_UP || key == KeyEvent.KEYCODE_DPAD_RIGHT;
-        });
-
         if (BuildConfig.LITE) bingPill.setVisibility(View.GONE);
+        status.setText("方向键选壁纸，确定应用");
     }
 
     private void focusFirstGridTile() {
@@ -450,17 +497,34 @@ public final class PersonalizeActivity extends Activity {
         });
     }
 
-    // ---- 右半屏：屏保 -------------------------------------------------------------
+    // ---- 屏保页 ------------------------------------------------------------------
 
-    private void wireSaver() {
+    private void wireSaverPage() {
         saverClock.setOnClickListener(v -> setSaverStyle("clock"));
         saverBing.setOnClickListener(v -> setSaverStyle("bing"));
 
+        idlePill.setOnClickListener(v -> {
+            choices.edit().putBoolean("idle_clock_enabled",
+                    !choices.getBoolean("idle_clock_enabled", true)).apply();
+            refreshScreensaver();
+            setResult(RESULT_OK);
+        });
+        idlePill.setOnFocusChangeListener((v, f) -> {
+            idlePill.setTextColor(f ? 0xFF14171C : 0xFFFFFFFF);
+            if (f) saverStatus.setText("关掉后待机再久也不进屏保");
+        });
+        idlePill.setOnKeyListener((v, key, event) -> {
+            if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
+            if (key == KeyEvent.KEYCODE_DPAD_DOWN) { saverClock.requestFocus(); return true; }
+            if (key == KeyEvent.KEYCODE_DPAD_UP) { tabSaver.requestFocus(); return true; }
+            return key == KeyEvent.KEYCODE_DPAD_LEFT || key == KeyEvent.KEYCODE_DPAD_RIGHT;
+        });
+
         saverClock.setOnFocusChangeListener((v, f) -> {
-            if (f) status.setText("时间屏保：大号时钟，不联网也一直有");
+            if (f) saverStatus.setText("时间屏保：大号时钟，不联网也一直有");
         });
         saverBing.setOnFocusChangeListener((v, f) -> {
-            if (f) status.setText("必应壁纸屏保：每天一张新风景，需要联网");
+            if (f) saverStatus.setText("必应壁纸屏保：每天一张新风景，需要联网");
         });
         saverClock.setOnKeyListener((v, key, event) -> saverKeys(key, event, true));
         saverBing.setOnKeyListener((v, key, event) -> saverKeys(key, event, false));
@@ -479,15 +543,16 @@ public final class PersonalizeActivity extends Activity {
             });
             segments[i].setOnKeyListener((v, key, event) -> {
                 if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
-                if (key == KeyEvent.KEYCODE_DPAD_UP) { saverBing.requestFocus(); return true; }
+                if (key == KeyEvent.KEYCODE_DPAD_UP) { saverClock.requestFocus(); return true; }
                 if (key == KeyEvent.KEYCODE_DPAD_DOWN) { nextSaverRow(); return true; }
                 if (key == KeyEvent.KEYCODE_DPAD_LEFT) {
-                    if (at == 0) saverBing.requestFocus();
+                    if (at == 0) saverClock.requestFocus();
                     else segments[at - 1].requestFocus();
                     return true;
                 }
                 if (key == KeyEvent.KEYCODE_DPAD_RIGHT) {
                     if (at < segments.length - 1) segments[at + 1].requestFocus();
+                    else previewButton.requestFocus();
                     return true;
                 }
                 return false;
@@ -503,29 +568,28 @@ public final class PersonalizeActivity extends Activity {
         previewButton.setOnClickListener(v -> startActivity(new Intent(this, ClockActivity.class)));
         previewButton.setOnFocusChangeListener((v, f) -> {
             ((TextView) previewButton).setTextColor(f ? 0xFF14171C : 0xFFFFFFFF);
-            if (f) status.setText("按确定立即预览，任意键返回");
+            if (f) saverStatus.setText("按确定立即预览，任意键返回");
         });
         previewButton.setOnKeyListener((v, key, event) -> bottomKeys(key, event, true));
     }
 
     private boolean saverKeys(int key, KeyEvent event, boolean first) {
         if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
-        if (key == KeyEvent.KEYCODE_DPAD_UP) { idlePill.requestFocus(); return true; }
+        if (key == KeyEvent.KEYCODE_DPAD_UP) { tabSaver.requestFocus(); return true; }
         if (key == KeyEvent.KEYCODE_DPAD_DOWN) {
-            if (segments[0].getVisibility() == View.VISIBLE) segments[1].requestFocus();
+            // 从卡片往下进「换图间隔」行，落在第一个「每次」上（跟视觉从左到右一致）
+            if (segments[0].getVisibility() == View.VISIBLE) segments[0].requestFocus();
             else previewButton.requestFocus();
             return true;
         }
         if (key == KeyEvent.KEYCODE_DPAD_RIGHT) {
             if (first) saverBing.requestFocus();
+            else previewButton.requestFocus();
             return true;
         }
         if (key == KeyEvent.KEYCODE_DPAD_LEFT) {
             if (!first) { saverClock.requestFocus(); return true; }
-            // 左边界 → 回网格里同一水平带最近的一格
-            View tile = nearestTileTo(saverClock.getTop());
-            if (tile != null) { tile.requestFocus(); return true; }
-            return true;
+            return true;   // 最左：吃掉，不跨回壁纸页
         }
         return false;
     }
@@ -540,7 +604,8 @@ public final class PersonalizeActivity extends Activity {
         if (key == KeyEvent.KEYCODE_DPAD_DOWN) return true;
         if (key == KeyEvent.KEYCODE_DPAD_LEFT) {
             if (!first && nextImage.getVisibility() == View.VISIBLE) previewButton.requestFocus();
-            else saverBing.requestFocus();
+            else if (segments[0].getVisibility() == View.VISIBLE) segments[segments.length - 1].requestFocus();
+            else saverClock.requestFocus();
             return true;
         }
         if (key == KeyEvent.KEYCODE_DPAD_RIGHT) {
@@ -553,18 +618,6 @@ public final class PersonalizeActivity extends Activity {
     private void nextSaverRow() {
         if (nextImage.getVisibility() == View.VISIBLE) nextImage.requestFocus();
         else previewButton.requestFocus();
-    }
-
-    /** 屏保卡片顶部高度附近、网格里最近的一格（从左往右的返回路径）。 */
-    private View nearestTileTo(int topPx) {
-        if (tiles.isEmpty()) return null;
-        View best = null;
-        int bestDist = Integer.MAX_VALUE;
-        for (View tile : tiles) {
-            int d = Math.abs(tile.getTop() - topPx);
-            if (d < bestDist) { bestDist = d; best = tile; }
-        }
-        return best;
     }
 
     private void setSaverStyle(String style) {
@@ -590,6 +643,8 @@ public final class PersonalizeActivity extends Activity {
         idlePill.setSelected(enabled);
         clockCaption.setText(bing ? "时间" : "时间  ✓");
         bingCaption.setText(bing ? "必应每日  ✓" : "必应每日");
+        TextView mode = findViewById(R.id.pzSaverMode);
+        if (mode != null) mode.setText(bing ? "当前：必应壁纸屏保" : "当前：时间屏保");
 
         int visibility = (bing && enabled) ? View.VISIBLE : View.GONE;
         intervalLabel.setVisibility(visibility);
@@ -613,7 +668,7 @@ public final class PersonalizeActivity extends Activity {
         io.execute(() -> {
             File file = BingScreensaver.pickForNow(this);
             if (file == null || !file.isFile()) return;
-            Bitmap bitmap = BingScreensaver.decode(file, 420, 240);
+            Bitmap bitmap = BingScreensaver.decode(file, 560, 300);
             if (bitmap == null) return;
             runOnUiThread(() -> {
                 if (isFinishing() || isDestroyed()) return;

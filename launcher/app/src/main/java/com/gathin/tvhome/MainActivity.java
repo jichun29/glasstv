@@ -393,6 +393,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener, T
         showStats = cfg.showStats;
         shamsi = cfg.shamsiDate;
         greetingName = cfg.greetingName;
+        // 时间与天气字号（2026-10-25 K，合并自二开版）：0 标准 / 1 大 / 2 特大。
+        // 只调左上角时间、日期、天气三处，格子与磁贴尺寸不动——960dp 屏上再大就会把网格挤走。
+        applyHeaderScale(Config.headerSize(this));
         if (shamsi) {
             shamsiDate.setVisibility(View.VISIBLE);
             TextView date = findViewById(R.id.date);
@@ -2180,6 +2183,22 @@ public class MainActivity extends Activity implements AppAdapter.TileListener, T
     // ---- race-weekend panel (a theme's race_calendar) -----------------------------------------------
 
     private static final int RACE_RED = 0xFFFF3B2F;
+
+    /**
+     * 时间与天气字号分三档（2026-10-25 K）。标准档就是布局里写死的尺寸；
+     * 大档时钟 52→62，特大档 52→72，日期/天气按比例跟着走。
+     */
+    private void applyHeaderScale(int level) {
+        if (clockBlock == null) return;
+        float clockSp = level >= 2 ? 72f : level == 1 ? 62f : 52f;
+        float dateSp = level >= 2 ? 22f : level == 1 ? 18f : 14f;
+        float weatherSp = level >= 2 ? 18f : level == 1 ? 15f : 13f;
+        TextView clock = clockBlock.findViewById(R.id.clock);
+        TextView date = clockBlock.findViewById(R.id.date);
+        if (clock != null) clock.setTextSize(TypedValue.COMPLEX_UNIT_SP, clockSp);
+        if (date != null) date.setTextSize(TypedValue.COMPLEX_UNIT_SP, shamsi ? dateSp - 3 : dateSp);
+        if (weatherText != null) weatherText.setTextSize(TypedValue.COMPLEX_UNIT_SP, weatherSp);
+    }
 
     /**
      * Shows or hides the race-weekend panel for this minute. Text only, set once a minute with the clock:

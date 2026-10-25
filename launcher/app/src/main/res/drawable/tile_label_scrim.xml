@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 图标磁贴名字的压暗层（2026-10-25 合并二开版）：由下往上渐黑，浅色图标上白字也清楚。 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <gradient
+        android:angle="270"
+        android:startColor="#00000000"
+        android:endColor="#AA000000" />
+</shape>

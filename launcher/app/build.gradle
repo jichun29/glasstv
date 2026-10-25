@@ -14,8 +14,8 @@ android {
         minSdk (lite ? 19 : 21)
         multiDexEnabled true
         targetSdk 34
-        versionCode 58
-        versionName lite ? '3.10.1-lite' : '3.10.1'
+        versionCode 59
+        versionName lite ? '3.10.2-lite' : '3.10.2'
     }
 
     signingConfigs {

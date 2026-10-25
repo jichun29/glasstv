@@ -36,6 +36,8 @@ final class Config {
     static final String SETTINGS_NAME = "launcher_settings";
     static final String ROWS_BELOW_DOCK_KEY = "rows_below_dock";
     static final String WALLPAPER_CHOICE_KEY = "wallpaper_choice";
+    /** 时间与天气字号档位（0 标准 / 1 大 / 2 特大），电视端选择，覆盖主题。 */
+    static final String HEADER_SIZE_KEY = "header_size";
     private static final String THEME_REVISION_NAME = "theme_revision";
     private static final String THEME_SIGNATURE_KEY = "theme_signature";
 
@@ -194,6 +196,13 @@ final class Config {
         this.homeIdleClockMinutes = homeIdleClockMinutes;
         this.topBar = topBar;
         this.weatherCity = weatherCity;
+    }
+
+    /** 时间与天气字号档位：0 标准 / 1 大 / 2 特大。范围外的值一律回标准档。 */
+    static int headerSize(Context ctx) {
+        int v = ctx.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE)
+                .getInt(HEADER_SIZE_KEY, 0);
+        return v < 0 || v > 2 ? 0 : v;
     }
 
     /** The folder the theme tools push into; null when external storage is unavailable. */

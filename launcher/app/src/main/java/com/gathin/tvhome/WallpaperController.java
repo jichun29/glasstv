@@ -8,17 +8,15 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.RadialGradient;
-import android.graphics.Rect;
 import android.graphics.Shader;
-import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -27,31 +25,46 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
  * Bundled offline wallpapers, ported from BeatsAD/quiet-tv (MIT, thanks WenBin AI LAB).
  *
- * Three landscape pictures ship in assets/wallpapers/. The user picks a fixed picture, a
- * five-minute slideshow, or the default backdrop (the launcher keeps its own ambient glow /
- * sky, so the "default" choice here just removes the picture layer). The picture layer sits
- * directly above the sky view and under the ambient glow: it is two ImageViews (current +
- * incoming for the cross-fade) plus a readability shade, inserted into the root FrameLayout
- * at index 1 by MainActivity.
+ * 2026-10-25 K：壁纸页重做成「缩略图网格」，素材扩到 11 张（并入二开版那套风景 / 跑车 / 卡通），
+ * 按分区排格子；遥控器上下左右走格子、OK 直接套用、返回退出。原来是一排卡片挤在弹窗里，
+ * 960dp 屏上最多摆 4 张，素材一多就放不下。
  *
- * The picker previews on focus without committing; OK commits, Back restores the committed
- * state. All decoding happens on a single background executor, downsampled to the screen,
+ * The picture layer sits directly above the sky view and under the ambient glow: it is two ImageViews
+ * (current + incoming for the cross-fade) plus a readability shade, inserted into the root FrameLayout
+ * at index 1 by MainActivity. All decoding happens on one background executor, downsampled to the screen,
  * so a 1 GB TV never holds more than roughly one screen-sized bitmap per picture.
  */
 final class WallpaperController {
-    private static final String[] FILES = {"big-sur-coastline", "big-sur-mountains", "big-sur-road"};
-    private static final String[] ZH = {"大苏尔海岸", "大苏尔群山", "大苏尔山路"};
+    /** 内置壁纸（2026-10-25 合并二开版素材）：随 APK 打包，不联网。 */
+    private static final String[] FILES = {
+            "coast", "forest", "waterfall", "alpine",
+            "car_coast", "car_desert",
+            "cartoon_coast", "cartoon_village",
+            "big-sur-coastline", "big-sur-mountains", "big-sur-road"};
+    private static final String[] ZH = {
+            "海岸暮色", "森林晨光", "金色瀑布", "雪山湖泊",
+            "海岸跑车", "峡谷跑车",
+            "卡通海岸", "童话小镇",
+            "大苏尔海岸", "大苏尔群山", "大苏尔山路"};
+    /** 壁纸页的分区：标题 + 该区在 FILES 里的起止下标。 */
+    private static final String[] GROUPS = {"自然风景", "跑车", "卡通场景", "清简风景"};
+    private static final int[] GROUP_FROM = {0, 4, 6, 8};
+    private static final int[] GROUP_TO = {4, 6, 8, FILES.length};
     private static final long ROTATION_MS = 5 * 60 * 1000L;
 
     /** Caller reacts to picture vs. default backdrop (hide ambient glow & sky over a photo). */
@@ -91,6 +104,8 @@ final class WallpaperController {
         rotating = preferences.getBoolean("rotating", true);
         useDefault = preferences.getBoolean("default", !preferences.contains("index"));
         if (useDefault) rotating = false;
+        // 素材表改过长度以后旧下标可能越界，兜底回第一张。
+        if (index < 0 || index >= FILES.length) index = 0;
         bing = new BingWallpaper(activity);
         bingMode = preferences.getBoolean("bing", false) && bing.enabled() && bing.file() != null;
 
@@ -286,47 +301,37 @@ final class WallpaperController {
         incoming.setImageDrawable(null);
     }
 
-    private String name(int n) { return n < 0 ? "默认壁纸" : ZH[n]; }
+    private String name(int n) { return n < 0 ? "默认壁纸（纯黑＋光晕）" : ZH[n]; }
 
-    // ---- picker (remote-friendly dialog) ---------------------------------------------------
+    // ---- picker: 整屏缩略图网格（2026-10-25 K）-------------------------------------------------
 
-    private TextView label(String value, float sizeSp) {
-        TextView text = new TextView(activity);
-        text.setText(value);
-        text.setTextColor(Color.WHITE);
-        text.setTextSize(sizeSp);
-        text.setIncludeFontPadding(false);
-        return text;
+    private float dp(float value) {
+        return value * activity.getResources().getDisplayMetrics().density;
     }
 
-    private GradientDrawable border(boolean focus) {
+    /** 壁纸页卡片/胶囊背景：默认深灰圆角，焦点白框提亮（和桌面设置页同一套语言）。 */
+    private GradientDrawable cardBg(boolean focus) {
         GradientDrawable bg = new GradientDrawable();
-        bg.setColor(0xb5202228);
-        float d = activity.getResources().getDisplayMetrics().density;
-        bg.setCornerRadius(12 * d);
-        bg.setStroke(Math.round((focus ? 3 : 1) * d), focus ? Color.WHITE : 0x60ffffff);
+        bg.setColor(focus ? 0x3DFFFFFF : 0xFF1C2128);
+        bg.setCornerRadius(dp(14));
+        bg.setStroke(Math.round((focus ? 2 : 1) * dp(1f)), focus ? 0xFFFFFFFF : 0x1FFFFFFF);
         return bg;
     }
 
-    private void place(FrameLayout parent, View view, int wDp, int hDp, int leftDp, int topDp) {
-        float d = activity.getResources().getDisplayMetrics().density;
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                Math.round(wDp * d), Math.round(hDp * d));
-        params.leftMargin = Math.round(leftDp * d);
-        params.topMargin = Math.round(topDp * d);
-        parent.addView(view, params);
-    }
-
+    /**
+     * 整屏壁纸页：标题 / 当前状态 / 轮播 + 必应两个开关 / 分区缩略图网格。
+     * 焦点走到哪张就先预览哪张；OK 套用并关页；返回 = 不改动。
+     */
     void showPicker() {
         if (picker != null) return;
         main.removeCallbacks(rotate);
         preview = useDefault ? -1 : (bingMode ? -2 : index);
         picker = new Dialog(activity);
-        FrameLayout content = new FrameLayout(activity);
+
         // Only the content layers above the wallpaper are hidden during preview; the
         // ambient/sky layers follow the wallpaper state, not this hide/show cycle.
         FrameLayout root = (FrameLayout) background.getParent();
-        java.util.ArrayList<View> hidden = new java.util.ArrayList<>();
+        ArrayList<View> hidden = new ArrayList<>();
         for (int n = 0; n < root.getChildCount(); n++) {
             View child = root.getChildAt(n);
             if (child != background && child.getVisibility() == View.VISIBLE
@@ -336,150 +341,281 @@ final class WallpaperController {
             }
         }
 
-        TextView title = label(activity.getString(R.string.wallpaper_settings), 26);
-        place(content, title, 300, 38, 48, 28);
+        FrameLayout page = new FrameLayout(activity);
+        page.setBackground(new GradientDrawable(GradientDrawable.Orientation.TL_BR,
+                new int[]{0xF20B1119, 0xF2000000}));
 
-        TextView mode = label(
-                useDefault ? "当前：默认壁纸 · 纯黑背景＋应用主题色光晕"
-                        : bingMode ? "当前：必应每日壁纸 · 每天自动换一张"
-                        : rotating ? "当前：自动轮播【每 5 分钟】" : "当前：固定壁纸", 13);
-        place(content, mode, 600, 25, 48, 73);
+        TextView title = label("壁纸", 30);
+        place(page, title, 300, 42, 60, 24);
 
-        TextView auto = label(rotating ? "壁纸轮播：开" : "壁纸轮播：关", 15);
-        auto.setGravity(Gravity.CENTER);
-        auto.setFocusable(true);
-        auto.setBackground(border(false));
-        place(content, auto, 150, 40, 600, 42);
+        TextView mode = label(currentLabel(), 13);
+        mode.setTextColor(0x99FFFFFF);
+        place(page, mode, 460, 24, 62, 74);
 
-        // 必应每日壁纸开关（tvhome-zh 移植）：打开后每天自动换必应今日图
-        // 精简版（Android 4.4/5.0 老盒子）不显示必应每日壁纸：每天联网下载 + 解码一张图，负担不值当。
+        // 右上两个开关：轮播 / 必应每日壁纸
+        TextView auto = pill(rotating ? "壁纸轮播：开" : "壁纸轮播：关");
+        place(page, auto, 172, 42, 552, 40);
         final boolean hasBing = !BuildConfig.LITE;
-        TextView bingBtn = label(bingMode || bing.enabled() ? "必应每日壁纸：开" : "必应每日壁纸：关", 15);
-        bingBtn.setGravity(Gravity.CENTER);
-        bingBtn.setFocusable(hasBing);
-        bingBtn.setBackground(border(false));
-        if (hasBing) place(content, bingBtn, 170, 40, 766, 42);
-        else bingBtn.setVisibility(View.GONE);
+        TextView bingBtn = pill(bingMode || bing.enabled() ? "必应每日：开" : "必应每日：关");
+        if (hasBing) place(page, bingBtn, 172, 42, 736, 40);
 
-        TextView status = label("", 14);
-        status.setGravity(Gravity.CENTER);
-        place(content, status, 864, 28, 48, 496);
+        TextView status = label("按方向键挑选，OK 应用", 13);
+        status.setTextColor(0x99FFFFFF);
+        place(page, status, 840, 24, 60, 508);
 
-        FrameLayout[] cards = new FrameLayout[FILES.length + 1];
-        for (int n = 0; n < cards.length; n++) {
-            final int slot = n, choice = n - 1;
-            FrameLayout card = new FrameLayout(activity);
-            cards[n] = card;
-            card.setFocusable(true);
-            float d = activity.getResources().getDisplayMetrics().density;
-            card.setPadding(Math.round(5 * d), Math.round(5 * d), Math.round(5 * d), Math.round(5 * d));
-            card.setBackground(border(false));
-            place(content, card, 204, 162, 48 + n * 220, 318);
-            card.setContentDescription(name(choice));
+        // ---- 缩略图网格（4 列，垂直滚动）----
+        ScrollView scroll = new ScrollView(activity);
+        scroll.setVerticalScrollBarEnabled(false);
+        scroll.setClipToPadding(false);
+        LinearLayout column = new LinearLayout(activity);
+        column.setOrientation(LinearLayout.VERTICAL);
+        column.setPadding(0, 0, 0, Math.round(dp(40)));
+        scroll.addView(column, new LinearLayout.LayoutParams(-1, -2));
+        place(page, scroll, 840, 352, 60, 112);
 
-            ImageView thumb = image();
-            card.addView(thumb, new FrameLayout.LayoutParams(-1, Math.round(112 * d)));
-            if (choice < 0) thumb.setImageBitmap(defaultThumbnail());
-            else decoder.execute(() -> {
-                Bitmap bitmap = thumbnail(choice);
-                main.post(() -> {
-                    if (picker != null && picker.isShowing()) thumb.setImageBitmap(bitmap);
-                });
+        final int TILE_W = 192, TILE_H = 112;   // 4 列 × 192 + 3×12 = 804 ≤ 840
+
+        final ArrayList<View> tiles = new ArrayList<>();
+        final ArrayList<Integer> tileChoice = new ArrayList<>();
+        final ArrayList<int[]> tileCell = new ArrayList<>();   // {row, col}，默认卡独占第 0 行
+
+        // 默认壁纸单独一张卡排最前（网格第 0 位）
+        addTile(column, tiles, tileChoice, tileCell, -1, 0, 0, TILE_W, TILE_H,
+                defaultThumbnail(), "默认", useDefault);
+
+        for (int g = 0; g < GROUPS.length; g++) {
+            TextView head = label(GROUPS[g], 12);
+            head.setTextColor(0x66FFFFFF);
+            // setLetterSpacing 要 API 21：4.4 上跳过，间距差一点点不影响排版
+            if (android.os.Build.VERSION.SDK_INT >= 21) head.setLetterSpacing(0.12f);
+            LinearLayout.LayoutParams hp = new LinearLayout.LayoutParams(-1, -2);
+            hp.topMargin = Math.round(dp(g == 0 ? 16 : 20));
+            hp.bottomMargin = Math.round(dp(6));
+            head.setLayoutParams(hp);
+            column.addView(head);
+
+            LinearLayout row = null;
+            for (int n = GROUP_FROM[g]; n < GROUP_TO[g]; n++) {
+                int slot = (n - GROUP_FROM[g]) % 4;
+                if (slot == 0) {
+                    row = new LinearLayout(activity);
+                    row.setOrientation(LinearLayout.HORIZONTAL);
+                    row.setLayoutParams(new LinearLayout.LayoutParams(-1, -2));
+                    column.addView(row);
+                }
+                addTile(row, tiles, tileChoice, tileCell, n, g + 1, slot, TILE_W, TILE_H,
+                        null, ZH[n], false);
+            }
+        }
+
+        // 缩略图后台解码后填进去（先占位，主线程不碰 11 张图）
+        for (int i = 0; i < tiles.size(); i++) {
+            final int choice = tileChoice.get(i);
+            if (choice < 0) continue;
+            final ImageView img = tiles.get(i).findViewWithTag("thumb");
+            decoder.execute(() -> {
+                Bitmap bmp = thumbnail(choice);
+                main.post(() -> { if (img != null && bmp != null) img.setImageBitmap(bmp); });
             });
+        }
 
-            boolean checked = choice < 0 ? useDefault : !useDefault && !rotating && index == choice;
-            TextView caption = label(name(choice) + (checked ? "  ✓" : ""), 15);
-            caption.setGravity(Gravity.CENTER);
-            card.addView(caption, new FrameLayout.LayoutParams(-1, Math.round(32 * d), Gravity.BOTTOM));
-
-            card.setOnFocusChangeListener((v, focus) -> {
-                card.setBackground(border(focus));
-                if (focus) { preview = choice; display(choice, true); status.setText(name(choice)); }
+        // 上下左右走格子：4 列，UP/DOWN 跳一行，到头就吃掉按键（不穿到顶部开关）
+        for (int i = 0; i < tiles.size(); i++) {
+            final int at = i;
+            View tile = tiles.get(i);
+            tile.setOnFocusChangeListener((v, focused) -> {
+                v.setBackground(cardBg(focused));
+                if (!focused) return;
+                int c = tileChoice.get(at);
+                preview = c;
+                display(c, true);
+                status.setText(name(c));
             });
-            card.setOnClickListener(v -> commit(choice < 0 ? index : choice, false, choice < 0, false));
-            card.setOnKeyListener((v, key, event) -> {
+            tile.setOnClickListener(v -> {
+                int c = tileChoice.get(at);
+                commit(c < 0 ? index : c, false, c < 0, false);
+            });
+            tile.setOnKeyListener((v, key, event) -> {
+                if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
+                int[] cell = tileCell.get(at);
                 if (key == KeyEvent.KEYCODE_DPAD_LEFT || key == KeyEvent.KEYCODE_DPAD_RIGHT) {
-                    if (event.getAction() == KeyEvent.ACTION_DOWN)
-                        cards[Math.max(0, Math.min(cards.length - 1,
-                                slot + (key == KeyEvent.KEYCODE_DPAD_LEFT ? -1 : 1)))].requestFocus();
+                    // 同一行内左右走；走到头就吃掉按键，别跳进别的分区
+                    int target = at + (key == KeyEvent.KEYCODE_DPAD_LEFT ? -1 : 1);
+                    if (target < 0 || target >= tiles.size()) return true;
+                    if (tileCell.get(target)[0] != cell[0]) return true;
+                    tiles.get(target).requestFocus();
                     return true;
                 }
                 if (key == KeyEvent.KEYCODE_DPAD_UP || key == KeyEvent.KEYCODE_DPAD_DOWN) {
-                    if (key == KeyEvent.KEYCODE_DPAD_UP && event.getAction() == KeyEvent.ACTION_DOWN)
-                        auto.requestFocus();
-                    return true;
+                    // 上下跨行按「视觉行列」找最近的：默认卡独占第 0 行，各分区从第 1 行起，
+                    // 用固定 ±4 会因为「跑车/卡通只有 2 张」而错位（实测会卡在边界出不去）。
+                    int wantRow = cell[0] + (key == KeyEvent.KEYCODE_DPAD_UP ? -1 : 1);
+                    int best = -1, bestDist = Integer.MAX_VALUE;
+                    for (int j = 0; j < tiles.size(); j++) {
+                        int[] c = tileCell.get(j);
+                        if (c[0] != wantRow) continue;
+                        int d = Math.abs(c[1] - cell[1]);
+                        if (d < bestDist) { bestDist = d; best = j; }
+                    }
+                    if (best >= 0) tiles.get(best).requestFocus();
+                    return true;   // 没有下一行就吃掉，别穿到顶部开关
                 }
                 return false;
             });
         }
 
         auto.setOnFocusChangeListener((v, focus) -> {
-            auto.setBackground(border(focus));
+            auto.setBackground(cardBg(focus));
             if (focus) status.setText(rotating
-                    ? "按确定关闭轮播，固定当前风景壁纸" : "按确定开启三张风景壁纸轮播");
+                    ? "按确定关闭轮播，固定当前壁纸" : "按确定开启轮播：每 5 分钟换一张");
         });
         auto.setOnClickListener(v -> commit(preview < 0 ? index : preview, !rotating, false, false));
         auto.setOnKeyListener((v, key, event) -> {
-            if (key == KeyEvent.KEYCODE_DPAD_DOWN) {
-                if (event.getAction() == KeyEvent.ACTION_DOWN) cards[preview + 1].requestFocus();
-                return true;
-            }
-            if (key == KeyEvent.KEYCODE_DPAD_RIGHT) {
-                if (event.getAction() == KeyEvent.ACTION_DOWN && hasBing) bingBtn.requestFocus();
-                return true;
-            }
+            if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
+            if (key == KeyEvent.KEYCODE_DPAD_DOWN) { tiles.get(0).requestFocus(); return true; }
+            if (key == KeyEvent.KEYCODE_DPAD_RIGHT && hasBing) { bingBtn.requestFocus(); return true; }
             return key == KeyEvent.KEYCODE_DPAD_UP || key == KeyEvent.KEYCODE_DPAD_LEFT;
         });
 
-        bingBtn.setOnFocusChangeListener((v, focus) -> {
-            bingBtn.setBackground(border(focus));
-            if (focus) status.setText(bingMode || bing.enabled()
-                    ? "按确定关闭必应每日壁纸（当前壁纸保留）" : "按确定开启：每天自动换一张必应今日图");
-        });
-        bingBtn.setOnClickListener(v -> {
-            boolean on = !(bingMode || bing.enabled());
-            bing.setEnabled(on);
-            if (on) {
-                // 开启：立即后台拉一张，拉到就切到必应模式
-                status.setText("正在下载今日必应壁纸…");
-                decoder.execute(() -> {
-                    bing.refreshIfDue();
-                    main.post(() -> {
-                        if (picker == null || activity.isDestroyed()) return;
-                        if (bing.file() != null) commit(0, false, false, true);
-                        else status.setText("下载失败（电视可能没联网），明天开机自动重试");
+        if (hasBing) {
+            bingBtn.setOnFocusChangeListener((v, focus) -> {
+                bingBtn.setBackground(cardBg(focus));
+                if (focus) status.setText(bingMode || bing.enabled()
+                        ? "按确定关闭必应每日壁纸（当前壁纸保留）" : "按确定开启：每天自动换一张必应今日图");
+            });
+            bingBtn.setOnClickListener(v -> {
+                boolean on = !(bingMode || bing.enabled());
+                bing.setEnabled(on);
+                if (on) {
+                    // 开启：立即后台拉一张，拉到就切到必应模式
+                    status.setText("正在下载今日必应壁纸…");
+                    decoder.execute(() -> {
+                        bing.refreshIfDue();
+                        main.post(() -> {
+                            if (picker == null || activity.isDestroyed()) return;
+                            if (bing.file() != null) commit(0, false, false, true);
+                            else status.setText("下载失败（电视可能没联网），明天开机自动重试");
+                        });
                     });
-                });
-            } else {
-                // 关闭：保留当前图当固定壁纸（不删文件，明天不再换）
-                commit(index, false, false, false);
-                Toast.makeText(activity, "已关闭必应每日壁纸", Toast.LENGTH_SHORT).show();
-            }
-        });
-        bingBtn.setOnKeyListener((v, key, event) -> {
-            if (key == KeyEvent.KEYCODE_DPAD_LEFT) {
-                if (event.getAction() == KeyEvent.ACTION_DOWN) auto.requestFocus();
-                return true;
-            }
-            return key == KeyEvent.KEYCODE_DPAD_UP || key == KeyEvent.KEYCODE_DPAD_DOWN;
-        });
+                } else {
+                    // 关闭：保留当前图当固定壁纸（不删文件，明天不再换）
+                    commit(index, false, false, false);
+                    Toast.makeText(activity, "已关闭必应每日壁纸", Toast.LENGTH_SHORT).show();
+                }
+            });
+            bingBtn.setOnKeyListener((v, key, event) -> {
+                if (event.getAction() == KeyEvent.ACTION_DOWN && key == KeyEvent.KEYCODE_DPAD_LEFT) {
+                    auto.requestFocus();
+                    return true;
+                }
+                return key == KeyEvent.KEYCODE_DPAD_UP || key == KeyEvent.KEYCODE_DPAD_DOWN;
+            });
+        }
 
-        picker.setContentView(content);
+        picker.setContentView(page);
         picker.setOnDismissListener(dialog -> {
             picker = null;
             for (View v : hidden) v.setVisibility(View.VISIBLE);
             display(useDefault ? -1 : (bingMode ? -2 : index), true);
             schedule();
         });
+        picker.setOnKeyListener((dialog, keyCode, event) -> {
+            // 返回 = 不改动，直接退出（Dialog 默认只关窗，这里显式处理避免焦点残留）
+            if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP) {
+                dialog.dismiss();
+                return true;
+            }
+            return false;
+        });
         Window window = picker.getWindow();
         window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-        window.setDimAmount(.12f);
+        window.setDimAmount(.10f);
         window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         picker.show();
         window.setLayout(-1, -1);
-        cards[useDefault ? 0 : index + 1].requestFocus();
+        // 开场焦点落在当前生效的那张（默认卡占网格第 0 位）
+        tiles.get(useDefault || bingMode ? 0 : Math.min(index + 1, tiles.size() - 1)).requestFocus();
+    }
+
+    private String currentLabel() {
+        if (bingMode) return "当前：必应每日壁纸 · 每天自动换一张";
+        if (useDefault) return "当前：默认壁纸 · 纯黑背景＋应用主题色光晕";
+        return "当前：" + name(index) + (rotating ? " · 轮流播放" : "");
+    }
+
+    /**
+     * 往网格里加一张壁纸卡：缩略图 + 名字。{@code bitmap} 为空时先留空，后台解码后再塞（tag "thumb"）。
+     */
+    private void addTile(ViewGroup parent, List<View> tiles, List<Integer> choices, List<int[]> cells,
+                         int choice, int row, int col, int wDp, int hDp,
+                         Bitmap bitmap, String caption, boolean checked) {
+        FrameLayout card = new FrameLayout(activity);
+        card.setFocusable(true);
+        card.setClickable(true);
+        card.setBackground(cardBg(false));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(Math.round(dp(wDp)), Math.round(dp(hDp)));
+        if (parent instanceof LinearLayout
+                && ((LinearLayout) parent).getOrientation() == LinearLayout.HORIZONTAL) {
+            lp.rightMargin = Math.round(dp(12));
+        }
+        card.setLayoutParams(lp);
+        card.setContentDescription(caption);
+
+        ImageView img = new ImageView(activity);
+        img.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        img.setTag("thumb");
+        if (bitmap != null) img.setImageBitmap(bitmap);
+        FrameLayout.LayoutParams ip = new FrameLayout.LayoutParams(-1, -1);
+        ip.setMargins(Math.round(dp(4)), Math.round(dp(4)), Math.round(dp(4)), Math.round(dp(4)));
+        card.addView(img, ip);
+
+        // 底部压暗 + 名字，浅色图上白字也看得清
+        View scrim = new View(activity);
+        scrim.setBackground(new GradientDrawable(GradientDrawable.Orientation.BOTTOM_TOP,
+                new int[]{0xB3000000, 0x00000000}));
+        FrameLayout.LayoutParams sp = new FrameLayout.LayoutParams(-1, Math.round(dp(44)), Gravity.BOTTOM);
+        sp.setMargins(Math.round(dp(4)), 0, Math.round(dp(4)), Math.round(dp(4)));
+        card.addView(scrim, sp);
+
+        TextView label = label(caption + (checked ? "  ✓" : ""), 13);
+        label.setSingleLine(true);
+        label.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        FrameLayout.LayoutParams np = new FrameLayout.LayoutParams(-1, -2, Gravity.BOTTOM);
+        np.setMargins(Math.round(dp(10)), 0, Math.round(dp(10)), Math.round(dp(10)));
+        card.addView(label, np);
+
+        parent.addView(card);
+        tiles.add(card);
+        choices.add(choice);
+        cells.add(new int[]{row, col});
+    }
+
+    private TextView pill(String value) {
+        TextView text = label(value, 14);
+        text.setGravity(Gravity.CENTER);
+        text.setFocusable(true);
+        text.setClickable(true);
+        text.setBackground(cardBg(false));
+        return text;
+    }
+
+    private TextView label(String value, float sizeSp) {
+        TextView text = new TextView(activity);
+        text.setText(value);
+        text.setTextColor(Color.WHITE);
+        text.setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSp);
+        text.setIncludeFontPadding(false);
+        return text;
+    }
+
+    private void place(FrameLayout parent, View view, int wDp, int hDp, int leftDp, int topDp) {
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                Math.round(dp(wDp)), Math.round(dp(hDp)));
+        params.leftMargin = Math.round(dp(leftDp));
+        params.topMargin = Math.round(dp(topDp));
+        parent.addView(view, params);
     }
 
     private void commit(int choice, boolean slideshow, boolean defaultWallpaper, boolean bingOn) {
@@ -493,7 +629,7 @@ final class WallpaperController {
         Toast.makeText(activity,
                 bingOn ? "已开启必应每日壁纸"
                         : defaultWallpaper ? "已恢复默认壁纸"
-                        : slideshow ? "已开启壁纸轮播" : "已关闭轮播，使用固定壁纸",
+                        : slideshow ? "已开启壁纸轮播" : "已应用：" + name(choice),
                 Toast.LENGTH_SHORT).show();
     }
 

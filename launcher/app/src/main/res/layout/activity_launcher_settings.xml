@@ -106,6 +106,45 @@
                 android:textSize="24sp" />
         </LinearLayout>
 
+        <!-- ========== 组 2.5：时间与天气（2026-10-25 合并二开版） ========== -->
+        <TextView
+            style="@style/SettingsGroupTitle"
+            android:layout_marginTop="32dp"
+            android:text="时间与天气" />
+
+        <LinearLayout style="@style/SettingsRowV2"
+            android:layout_marginTop="12dp"
+            android:focusable="false"
+            android:clickable="false">
+            <TextView style="@style/SettingsRowLabel"
+                android:text="时间与天气字号" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView android:id="@+id/headerSize0"
+                    style="@style/SettingsSegment"
+                    android:layout_width="wrap_content"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="标准" />
+                <TextView android:id="@+id/headerSize1"
+                    style="@style/SettingsSegment"
+                    android:layout_width="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="大" />
+                <TextView android:id="@+id/headerSize2"
+                    style="@style/SettingsSegment"
+                    android:layout_width="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="特大" />
+            </LinearLayout>
+        </LinearLayout>
+
         <!-- ========== 组 3：动效 ========== -->
         <TextView
             style="@style/SettingsGroupTitle"

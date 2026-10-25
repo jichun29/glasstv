@@ -23,6 +23,8 @@ public final class LauncherSettingsActivity extends Activity {
     private SharedPreferences choices;
     private final TextView[] columnChoices = new TextView[4];
     private final TextView[] rowChoices = new TextView[4];
+    private final TextView[] headerSizeChoices = new TextView[3];
+    private int headerSize;
     private View animationsChoice;
     private TextView animationsValue;
     private View motionChoice;
@@ -87,6 +89,21 @@ public final class LauncherSettingsActivity extends Activity {
             reverseRow(rowChoices);
         }
 
+        // ===== 分段：时间与天气字号（2026-10-25 合并二开版） =====
+        headerSize = Config.headerSize(this);
+        int[] sizeIds = {R.id.headerSize0, R.id.headerSize1, R.id.headerSize2};
+        for (int i = 0; i < sizeIds.length; i++) {
+            final int value = i;
+            headerSizeChoices[i] = findViewById(sizeIds[i]);
+            headerSizeChoices[i].setOnClickListener(v -> {
+                if (headerSize == value) return;
+                headerSize = value;
+                choices.edit().putInt(Config.HEADER_SIZE_KEY, value).apply();
+                setResult(RESULT_OK);
+                refresh();
+            });
+        }
+
         // ===== 外观：壁纸 / 屏保（各自独立页） =====
         wallpaperEntryValue = findViewById(R.id.wallpaperEntryValue);
         screensaverEntryValue = findViewById(R.id.screensaverEntryValue);
@@ -146,6 +163,7 @@ public final class LauncherSettingsActivity extends Activity {
             if (!hasOnTvChoices()) return;
             choices.edit().remove("columns").remove(Config.ROWS_BELOW_DOCK_KEY).remove("animations")
                     .remove("advanced_effects").remove("reduced_motion")
+                    .remove(Config.HEADER_SIZE_KEY)
                     .remove(Config.WALLPAPER_CHOICE_KEY).commit();
             Config current = Config.load(this);
             columns = current.columns;
@@ -153,6 +171,7 @@ public final class LauncherSettingsActivity extends Activity {
             animations = current.animations;
             advancedEffects = current.animations && current.advancedEffects;
             reducedMotion = current.reducedMotion;
+            headerSize = Config.headerSize(this);
             setResult(RESULT_OK);
             refresh();
         });
@@ -215,6 +234,9 @@ public final class LauncherSettingsActivity extends Activity {
         for (int i = 0; i < rowChoices.length; i++) {
             rowChoices[i].setSelected(rowsBelowDock == i);
         }
+        for (int i = 0; i < headerSizeChoices.length; i++) {
+            if (headerSizeChoices[i] != null) headerSizeChoices[i].setSelected(headerSize == i);
+        }
         // 开关：只更新右侧的「开/关」值，行标签留在 XML 里
         animationsValue.setText(animations ? R.string.on : R.string.off);
         animationsValue.setTextColor(animations ? 0xFF4ADE80 : 0x66FFFFFF);
@@ -253,6 +275,7 @@ public final class LauncherSettingsActivity extends Activity {
         return choices.contains("columns") || choices.contains(Config.ROWS_BELOW_DOCK_KEY)
                 || choices.contains("animations") || choices.contains("advanced_effects")
                 || choices.contains("reduced_motion")
+                || choices.contains(Config.HEADER_SIZE_KEY)
                 || choices.contains(Config.WALLPAPER_CHOICE_KEY);
     }
 }

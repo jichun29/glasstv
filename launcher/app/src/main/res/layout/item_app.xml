@@ -32,6 +32,8 @@
             android:visibility="gone"
             android:contentDescription="@null" />
 
+        <!-- 图标磁贴底部的名字（2026-10-25 合并二开版）：压一层由下往上的黑色渐变，
+             浅色图标上白字也读得清；名字独占底部一行，不再浮在图标中间。 -->
         <TextView
             android:id="@+id/label"
             android:layout_width="match_parent"
@@ -39,13 +41,15 @@
             android:layout_gravity="bottom"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
+            android:paddingTop="18dp"
             android:paddingBottom="8dp"
             android:gravity="center"
             android:singleLine="true"
             android:ellipsize="end"
+            android:background="@drawable/tile_label_scrim"
             android:textColor="#FFFFFFFF"
-            android:textSize="13sp"
-            android:fontFamily="@font/outfit"
+            android:textSize="14sp"
+            android:fontFamily="@font/outfit_medium"
             android:visibility="gone" />
     </FrameLayout>
 

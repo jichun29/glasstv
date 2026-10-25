@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 屏保设置（2026-10-24 K 重做）：照壁纸设置页的版式——深色整屏 + 右上胶囊开关 +
+     两张大幅预览卡片 + 分段胶囊 + 底部预览入口。坐标按 960x540dp（1920x1080 ÷ 2.0）排，
+     任何控件 x + 宽度不越 960dp。 -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/saver_page_bg">
+
+    <!-- 标题 -->
+    <TextView
+        android:id="@+id/saverTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="26dp"
+        android:text="屏保"
+        android:textColor="#FFFFFFFF"
+        android:textSize="26sp"
+        android:fontFamily="@font/outfit_medium"
+        android:letterSpacing="0.02" />
+
+    <TextView
+        android:id="@+id/saverMode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="68dp"
+        android:text="当前：时间屏保"
+        android:textColor="#80FFFFFF"
+        android:textSize="13sp"
+        android:fontFamily="@font/outfit_regular" />
+
+    <!-- 右上：屏保开关胶囊 -->
+    <TextView
+        android:id="@+id/idleClockChoice"
+        android:layout_width="152dp"
+        android:layout_height="44dp"
+        android:layout_marginStart="760dp"
+        android:layout_marginTop="30dp"
+        android:gravity="center"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="@drawable/saver_pill"
+        android:text="屏保：开"
+        android:textColor="#FFFFFFFF"
+        android:textSize="15sp"
+        android:fontFamily="@font/outfit_medium" />
+
+    <!-- 分组：样式 -->
+    <TextView
+        android:id="@+id/styleLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="112dp"
+        android:text="样式"
+        android:textColor="#66FFFFFF"
+        android:textSize="13sp"
+        android:letterSpacing="0.12" />
+
+    <!-- 卡片一：时间屏保 -->
+    <FrameLayout
+        android:id="@+id/styleClock"
+        android:layout_width="300dp"
+        android:layout_height="196dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="140dp"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="@drawable/saver_card"
+        android:padding="6dp"
+        android:clipChildren="false">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="152dp"
+            android:background="@drawable/saver_card_preview">
+
+            <TextClock
+                android:id="@+id/previewClock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:format12Hour="HH:mm"
+                android:format24Hour="HH:mm"
+                android:textColor="#F2FFFFFF"
+                android:textSize="54sp"
+                android:fontFamily="@font/outfit_extralight"
+                android:includeFontPadding="false" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/clockCaption"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:layout_gravity="bottom"
+            android:gravity="center"
+            android:text="时间"
+            android:textColor="#E6FFFFFF"
+            android:textSize="15sp"
+            android:fontFamily="@font/outfit_regular" />
+    </FrameLayout>
+
+    <!-- 卡片二：必应壁纸屏保 -->
+    <FrameLayout
+        android:id="@+id/styleBing"
+        android:layout_width="300dp"
+        android:layout_height="196dp"
+        android:layout_marginStart="368dp"
+        android:layout_marginTop="140dp"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="@drawable/saver_card"
+        android:padding="6dp"
+        android:clipChildren="false">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="152dp"
+            android:background="@drawable/saver_card_preview">
+
+            <ImageView
+                android:id="@+id/bingThumb"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:contentDescription="@null" />
+
+            <TextView
+                android:id="@+id/bingPlaceholder"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="联网后自动取必应每日图"
+                android:textColor="#66FFFFFF"
+                android:textSize="13sp" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/bingCaption"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:layout_gravity="bottom"
+            android:gravity="center"
+            android:text="必应每日壁纸"
+            android:textColor="#E6FFFFFF"
+            android:textSize="15sp"
+            android:fontFamily="@font/outfit_regular" />
+    </FrameLayout>
+
+    <!-- 分组：换图间隔（仅壁纸屏保时出现） -->
+    <TextView
+        android:id="@+id/intervalLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="356dp"
+        android:text="换图间隔"
+        android:textColor="#66FFFFFF"
+        android:textSize="13sp"
+        android:letterSpacing="0.12"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/wpEveryTime"
+        android:layout_width="96dp"
+        android:layout_height="42dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="384dp"
+        android:gravity="center"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="@drawable/saver_segment"
+        android:text="每次"
+        android:textColor="#FFFFFFFF"
+        android:textSize="15sp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/wp1h"
+        android:layout_width="96dp"
+        android:layout_height="42dp"
+        android:layout_marginStart="152dp"
+        android:layout_marginTop="384dp"
+        android:gravity="center"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="@drawable/saver_segment"
+        android:text="1 小时"
+        android:textColor="#FFFFFFFF"
+        android:textSize="15sp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/wp1d"
+        android:layout_width="96dp"
+        android:layout_height="42dp"
+        android:layout_marginStart="256dp"
+        android:layout_marginTop="384dp"
+        android:gravity="center"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="@drawable/saver_segment"
+        android:text="1 天"
+        android:textColor="#FFFFFFFF"
+        android:textSize="15sp"
+        android:visibility="gone" />
+
+    <!-- 立即换一张（仅壁纸屏保时出现） -->
+    <TextView
+        android:id="@+id/wpNextChoice"
+        android:layout_width="180dp"
+        android:layout_height="42dp"
+        android:layout_marginStart="368dp"
+        android:layout_marginTop="384dp"
+        android:gravity="center"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="@drawable/saver_pill"
+        android:text="立即换一张"
+        android:textColor="#FFFFFFFF"
+        android:textSize="15sp"
+        android:visibility="gone" />
+
+    <!-- 预览屏保 -->
+    <TextView
+        android:id="@+id/previewScreensaverChoice"
+        android:layout_width="168dp"
+        android:layout_height="46dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="462dp"
+        android:gravity="center"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="@drawable/saver_pill"
+        android:text="预览屏保"
+        android:textColor="#FFFFFFFF"
+        android:textSize="15sp"
+        android:fontFamily="@font/outfit_medium" />
+
+    <!-- 底部说明 -->
+    <TextView
+        android:id="@+id/saverHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="232dp"
+        android:layout_marginTop="478dp"
+        android:text="按遥控器任意键退出屏保"
+        android:textColor="#4DFFFFFF"
+        android:textSize="13sp" />
+
+    <!-- 状态行（选卡时提示，和壁纸页一致） -->
+    <TextView
+        android:id="@+id/saverStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="514dp"
+        android:textColor="#80FFFFFF"
+        android:textSize="13sp" />
+</FrameLayout>

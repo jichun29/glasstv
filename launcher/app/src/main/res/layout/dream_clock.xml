@@ -41,7 +41,7 @@
         <TextClock
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:format12Hour="h:mm"
+            android:format12Hour="HH:mm"
             android:format24Hour="HH:mm"
             android:textColor="#E6FFFFFF"
             android:textSize="120sp"
@@ -63,7 +63,7 @@
             <TextClock
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:format12Hour="a"
+                android:format12Hour=""
                 android:format24Hour=""
                 android:textColor="#99FFFFFF"
                 android:textSize="22sp"

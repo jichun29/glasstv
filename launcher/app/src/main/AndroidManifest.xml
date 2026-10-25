@@ -17,8 +17,6 @@
         tools:ignore="CoarseFineLocation" />
     <!-- K 定制: 直接卸载应用, 不跳第三方管理页 -->
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
-    <!-- K 2026-10-22 控制中心调音量（普通权限，无需运行时申请） -->
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <!-- 开机自启：开机后桌面守护确认前台是谁（2026-10-23 移植自 aerial-tv） -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- 一键 OTA：应用内下载 APK 后交给系统安装器 -->
@@ -123,6 +121,17 @@
             android:label="快传"
             android:theme="@android:style/Theme.Black.NoTitleBar"
             android:exported="false" />
+        <!-- 屏保 / 壁纸 / 内存清理：从桌面设置里拆出来的三个独立页（2026-10-23 K） -->
+        <activity
+            android:name=".ScreensaverSettingsActivity"
+            android:label="屏保"
+            android:exported="false"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".MemoryCleanSettingsActivity"
+            android:label="内存清理"
+            android:exported="false"
+            android:screenOrientation="landscape" />
         <!-- 清理白名单管理 -->
         <activity
             android:name=".WhitelistActivity"

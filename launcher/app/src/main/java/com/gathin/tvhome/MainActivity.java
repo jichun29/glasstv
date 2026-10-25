@@ -99,6 +99,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener, T
     static final String ACTION_SHOW_LIBRARY = "com.gathin.tvhome.action.SHOW_LIBRARY";
     /** 控制中心 → 直接进重排模式（K 2026-10-22）。 */
     static final String ACTION_START_REORDER = "com.gathin.tvhome.action.START_REORDER";
+    /** 控制中心 → 桌面自带的「关于」弹窗（K 2026-10-24）：不要跳系统关于页。 */
+    static final String ACTION_SHOW_ABOUT = "com.gathin.tvhome.action.SHOW_ABOUT";
     /** Tiles per row and dock slots (res/values/config.xml, columns). Set in onCreate. */
     static int COLUMNS = 4;
     private boolean rtlAppGrid;
@@ -535,26 +537,24 @@ public class MainActivity extends Activity implements AppAdapter.TileListener, T
         }
 
         btnInputs = findViewById(R.id.btnInputs);
-        View btnSettings = findViewById(R.id.btnSettings);
-        // K 2026-10-22：右上角顶栏整组默认隐藏（「完全不必要」，功能全进控制中心）。
-        // config.xml 设 top_bar=true 才显示；同时仍受 icon_only_buttons / show_network_pill 等细项限制。
+        TextView btnSettings = findViewById(R.id.btnSettings);
+        // 右上角统一为单一控制中心入口；原信号源/Wi-Fi/设置能力都收进控制中心。
         View topButtons = findViewById(R.id.topButtons);
         if (topButtons != null) topButtons.setVisibility(cfg.topBar ? View.VISIBLE : View.GONE);
+        btnInputs.setVisibility(View.GONE);
+        btnWifi.setVisibility(View.GONE);
         btnInputs.setOnClickListener(v -> showInputs());
-        btnWifi.setOnClickListener(v -> openNetworkPill());
-        btnWifi.setOnLongClickListener(v -> {
-            open(systemIntent(Settings.ACTION_WIFI_SETTINGS));
+        btnSettings.setText(R.string.settings);
+        btnSettings.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_settings, 0, 0, 0);
+        btnSettings.setOnClickListener(v -> open(new Intent(this, QuickSettingsActivity.class)));
+        btnSettings.setOnLongClickListener(v -> {
+            showSettingsMenu();
             return true;
         });
-        // 老大 2026-10-21 需求：单击设置按钮 → 弹「桌面设置 / 系统设置」二选一。
-        // 桌面设置 = LauncherSettingsActivity（壁纸/动画/列数/Dock 全在里面，解决「壁纸设过一次就再也找不到」）。
-        // 系统设置 = 原来的 Settings.ACTION_SETTINGS（国行走小米 fallback）。
-        // 长按仍弹上游完整菜单（launcher 设置/模块卡片/Dock 编辑/重排），给高级用户留着。
-        btnSettings.setOnClickListener(v -> showSettingsChooser());
         btnReorder = findViewById(R.id.btnReorder);
         btnReorder.setOnClickListener(v -> toggleReorder());
         btnReorder.setVisibility(cfg.reorderButton ? View.VISIBLE : View.GONE);
-        if (!cfg.showNetworkPill) btnWifi.setVisibility(View.GONE);
+        // 2026-10-23：右上角已合并成单一控制中心入口，三项细分开关不再控制按钮显示。
         btnLibraryTop = findViewById(R.id.btnLibraryTop);
         btnLibraryTop.setOnClickListener(v -> {
             onLibraryRequested();
@@ -647,6 +647,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener, T
         if (ACTION_SHOW_WALLPAPER.equals(intent.getAction())) {
             setIntent(new Intent(Intent.ACTION_MAIN));
             root.post(() -> wallpapers.showPicker());
+            return true;
+        }
+        if (ACTION_SHOW_ABOUT.equals(intent.getAction())) {
+            setIntent(new Intent(Intent.ACTION_MAIN));
+            root.post(this::showAbout);
             return true;
         }
         if (ACTION_SHOW_LIBRARY.equals(intent.getAction())) {
@@ -2447,25 +2452,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener, T
         return new Intent(standardAction);   // nothing found: let open() show the can't-open toast
     }
 
-    /** Hides the Inputs pill when it would have nothing to list: streaming boxes have no HDMI-in, AV or tuner. */
+    /** Inputs is a control-center action; keep the old standalone pill hidden. */
     private void updateInputsButton() {
-        boolean any = liveTvIntent() != null || !sourcePanelService.isEmpty();
-        // 4.4 没有 TvInputManager（API 21 才有），不做 HDMI 探测：有 Live TV/源面板才显示输入源按钮。
-        if (Build.VERSION.SDK_INT < 21) {
-            btnInputs.setVisibility(any ? View.VISIBLE : View.GONE);
-            return;
-        }
-        TvInputManager tim = (TvInputManager) getSystemService(TV_INPUT_SERVICE);
-        if (!any && tim != null) {
-            for (TvInputInfo info : tim.getTvInputList()) {
-                // Inputs hidden in Settings > Inputs are left out of the menu, so they don't count here either.
-                if (info.isPassthroughInput() && !TvCompat.isHidden(this, info)) {
-                    any = true;
-                    break;
-                }
-            }
-        }
-        btnInputs.setVisibility(any ? View.VISIBLE : View.GONE);
+        btnInputs.setVisibility(View.GONE);
     }
 
     /** The Live TV app's launch intent: its leanback entry point, or the configured action if it has none. */

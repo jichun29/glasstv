@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 屏保页整屏底色：和壁纸设置页同一套深灰，底部略亮，避免纯黑死板。 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <gradient
+        android:startColor="#FF0E1116"
+        android:centerColor="#FF12161C"
+        android:endColor="#FF171C23"
+        android:angle="270" />
+</shape>

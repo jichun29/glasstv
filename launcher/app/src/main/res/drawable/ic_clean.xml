@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 清理图标（2026-10-23）：扫帚。 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="22dp" android:height="22dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M19.36,2.72L20.78,4.14 15.06,9.85c0.39,0.45 0.72,0.96 0.93,1.53l3.94-3.94c0.39,0.39 0.39,1.02 0,1.41l-4.53,4.53c0.34,0.44 0.58,0.94 0.71,1.47l5.27-5.27 1.41,1.41L9.33,23.5c-0.39,0.39 -1.02,0.39 -1.41,0l-6.36,-6.36c-0.39,-0.39 -0.39,-1.02 0,-1.41L13.78,4.14c0.39,-0.39 1.02,-0.39 1.41,0l0.71,0.71c0.61,-0.71 1.5,-1.17 2.5,-1.17 0.32,0 0.63,0.03 0.92,0.09zM3,17.25l3.75,3.75 8.49,-8.49 -3.75,-3.75L3,17.25z" />
+</vector>

@@ -309,11 +309,11 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     Legacy.drawable(ctx, R.drawable.ic_home_settings), null, 0));
         }
         // U 盘磁贴（2026-10-23 K）：插上 U 盘时出现在网格里，点进去直达 U 盘目录。
-        if (UsbStorage.isPlugged()) {
-            fresh.add(new Entry(Entry.USB, "U 盘",
-                    new ComponentName(ctx, "usb-drive"), null,
-                    Legacy.drawable(ctx, R.drawable.ic_usb), "已连接", 0xFF5FA978));
-        }
+            if (UsbStorage.isPlugged()) {
+                fresh.add(new Entry(Entry.USB, "U 盘",
+                        new ComponentName(ctx, "usb-drive"), null,
+                        Legacy.drawable(ctx, R.drawable.ic_usb), "已连接", 0xFF5FA978));
+            }
         docked = 0;
         while (docked < fresh.size() && favourites.contains(fresh.get(docked).pkg)) docked++;
         emptySlots = dockRow && !reordering ? DockSlots.empty(docked, dockSize, fresh.size(), fillDock) : 0;

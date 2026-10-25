@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 内存清理（2026-10-23 K）：从「桌面设置」里拆出来的独立页。 -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FF101419"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="88dp"
+        android:paddingEnd="88dp"
+        android:paddingTop="40dp"
+        android:paddingBottom="48dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="内存清理"
+            android:textColor="#FFFFFFFF"
+            android:textSize="32sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="清掉后台闲置进程，给正在用的 App 让出内存"
+            android:textColor="#66FFFFFF"
+            android:textSize="14sp" />
+
+        <TextView
+            style="@style/SettingsGroupTitle"
+            android:layout_marginTop="32dp"
+            android:text="清理" />
+
+        <LinearLayout style="@style/SettingsRowV2"
+            android:id="@+id/cleanNowChoice"
+            android:layout_marginTop="12dp">
+            <TextView style="@style/SettingsRowLabel"
+                android:text="立即清理一次" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="›"
+                android:textColor="#66FFFFFF"
+                android:textSize="24sp" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/SettingsRowV2"
+            android:id="@+id/autoCleanChoice"
+            android:layout_marginTop="10dp">
+            <TextView style="@style/SettingsRowLabel"
+                android:text="自动清理内存" />
+            <TextView android:id="@+id/autoCleanValue" style="@style/SettingsRowValue"
+                android:text="@string/off" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/SettingsRowV2"
+            android:id="@+id/autoCleanIntervalRow"
+            android:layout_marginTop="10dp"
+            android:focusable="false"
+            android:clickable="false"
+            android:visibility="gone">
+            <TextView style="@style/SettingsRowLabel"
+                android:text="清理间隔" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView android:id="@+id/interval30"
+                    style="@style/SettingsSegment"
+                    android:layout_width="wrap_content"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="30分钟" />
+                <TextView android:id="@+id/interval60"
+                    style="@style/SettingsSegment"
+                    android:layout_width="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="1小时" />
+                <TextView android:id="@+id/interval180"
+                    style="@style/SettingsSegment"
+                    android:layout_width="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="3小时" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout style="@style/SettingsRowV2"
+            android:id="@+id/cleanWhitelistChoice"
+            android:layout_marginTop="10dp">
+            <TextView style="@style/SettingsRowLabel"
+                android:text="清理白名单（这些 App 不会被清）" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="›"
+                android:textColor="#66FFFFFF"
+                android:textSize="24sp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/cleanHint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="桌面自己永远不参与清理；待机时也会自动清一次"
+            android:textColor="#4DFFFFFF"
+            android:textSize="13sp" />
+    </LinearLayout>
+</ScrollView>

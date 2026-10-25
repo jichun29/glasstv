@@ -1,20 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 桌面设置页 v2（K 2026-10-22 重做）。
-     从「一屏大横条」改成「分组 + 左标签右控件」的标准电视设置页。
-
-     之前的毛病（vision 复核 + K 原话「排版乱七八糟」）：
-       1. 所有设置都是同一条深灰大横条，看不出谁是开关、谁是入口、谁是数值
-       2. 焦点态和选中态共用同一个绿色高亮，遥控器指到哪儿全靠猜
-       3. 没有分组标题，壁纸/动效/系统设置糊在一起
-       4. 行高忽大忽小，留白节奏乱
-
-     现在：
-       1. 四个分组：桌面布局 / 动效 / 软件更新 / 系统
-       2. 每行 = 左侧设置名 + 右侧当前值/开关，值用灰一档的字
-       3. 分段控件（4/5/6/7、0/1/2/3）做成紧凑小格子，选中绿色、焦点白框
-       4. 焦点态和选中态完全分开：焦点=白框，选中=绿描边/绿填充
-       5. 每组间距统一：组标题上 32dp，行间距 10dp
--->
+<!-- 桌面设置（2026-10-23 K）：壁纸 / 屏保 / 内存清理 已拆成三个独立页，这里只留入口。 -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -34,7 +19,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/launcher_settings"
+            android:text="桌面设置"
             android:textColor="#FFFFFFFF"
             android:textSize="32sp"
             android:textStyle="bold" />
@@ -42,10 +27,9 @@
         <!-- ========== 组 1：桌面布局 ========== -->
         <TextView
             style="@style/SettingsGroupTitle"
-            android:layout_marginTop="36dp"
-            android:text="@string/settings_group_layout" />
+            android:layout_marginTop="32dp"
+            android:text="布局" />
 
-        <!-- 每行应用数量 -->
         <LinearLayout style="@style/SettingsRowV2"
             android:layout_marginTop="12dp"
             android:focusable="false"
@@ -66,7 +50,6 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- 应用栏下方保留行数 -->
         <LinearLayout style="@style/SettingsRowV2"
             android:layout_marginTop="10dp"
             android:focusable="false"
@@ -87,13 +70,18 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- 壁纸 -->
+        <!-- ========== 组 2：外观（壁纸 / 屏保，各自独立页） ========== -->
+        <TextView
+            style="@style/SettingsGroupTitle"
+            android:layout_marginTop="32dp"
+            android:text="外观" />
+
         <LinearLayout style="@style/SettingsRowV2"
-            android:id="@+id/wallpaperChoice"
-            android:layout_marginTop="10dp">
+            android:id="@+id/wallpaperEntry"
+            android:layout_marginTop="12dp">
             <TextView style="@style/SettingsRowLabel"
-                android:text="@string/wallpaper_label" />
-            <TextView android:id="@+id/wallpaperValue" style="@style/SettingsRowValue"
+                android:text="壁纸" />
+            <TextView android:id="@+id/wallpaperEntryValue" style="@style/SettingsRowValue"
                 android:text="@string/wallpaper_theme_default" />
             <TextView
                 android:layout_width="wrap_content"
@@ -103,13 +91,27 @@
                 android:textSize="24sp" />
         </LinearLayout>
 
-        <!-- ========== 组 2：动效 ========== -->
+        <LinearLayout style="@style/SettingsRowV2"
+            android:id="@+id/screensaverEntry"
+            android:layout_marginTop="10dp">
+            <TextView style="@style/SettingsRowLabel"
+                android:text="屏保" />
+            <TextView android:id="@+id/screensaverEntryValue" style="@style/SettingsRowValue"
+                android:text="时间 · 开" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="›"
+                android:textColor="#66FFFFFF"
+                android:textSize="24sp" />
+        </LinearLayout>
+
+        <!-- ========== 组 3：动效 ========== -->
         <TextView
             style="@style/SettingsGroupTitle"
-            android:layout_marginTop="40dp"
-            android:text="@string/settings_group_motion" />
+            android:layout_marginTop="32dp"
+            android:text="动效" />
 
-        <!-- 动态效果 -->
         <LinearLayout style="@style/SettingsRowV2"
             android:id="@+id/animationsChoice"
             android:layout_marginTop="12dp">
@@ -119,7 +121,6 @@
                 android:text="@string/on" />
         </LinearLayout>
 
-        <!-- 减弱动画 -->
         <LinearLayout style="@style/SettingsRowV2"
             android:id="@+id/motionChoice"
             android:layout_marginTop="10dp">
@@ -129,7 +130,6 @@
                 android:text="@string/off" />
         </LinearLayout>
 
-        <!-- 高级动态效果 -->
         <LinearLayout style="@style/SettingsRowV2"
             android:id="@+id/advancedChoice"
             android:layout_marginTop="10dp">
@@ -139,7 +139,6 @@
                 android:text="@string/off" />
         </LinearLayout>
 
-        <!-- 高级效果说明：只在禁用时显示 -->
         <TextView
             android:id="@+id/advancedOffHint"
             android:layout_width="match_parent"
@@ -151,7 +150,6 @@
             android:textSize="13sp"
             android:visibility="gone" />
 
-        <!-- 恢复主题默认 -->
         <LinearLayout style="@style/SettingsRowV2"
             android:id="@+id/followThemeChoice"
             android:layout_marginTop="10dp">
@@ -165,121 +163,12 @@
                 android:textSize="24sp" />
         </LinearLayout>
 
-        <!-- ========== 组 2.5：屏保（2026-10-23 K：从「动态效果」里独立出来） ========== -->
+        <!-- ========== 组 4：软件更新 ========== -->
         <TextView
             style="@style/SettingsGroupTitle"
-            android:layout_marginTop="40dp"
-            android:text="屏保" />
-
-        <!-- 屏保样式：时间屏保 / 壁纸屏保 -->
-        <LinearLayout style="@style/SettingsRowV2"
-            android:layout_marginTop="12dp"
-            android:focusable="false"
-            android:clickable="false">
-            <TextView style="@style/SettingsRowLabel"
-                android:text="屏保样式" />
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <TextView android:id="@+id/styleClock"
-                    style="@style/SettingsSegment"
-                    android:layout_width="wrap_content"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp"
-                    android:text="时间" />
-                <TextView android:id="@+id/styleBing"
-                    style="@style/SettingsSegment"
-                    android:layout_width="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp"
-                    android:text="壁纸" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- 屏保开关 -->
-        <LinearLayout style="@style/SettingsRowV2"
-            android:id="@+id/idleClockChoice"
-            android:layout_marginTop="10dp">
-            <TextView style="@style/SettingsRowLabel"
-                android:text="屏保开关" />
-            <TextView android:id="@+id/idleClockValue" style="@style/SettingsRowValue"
-                android:text="@string/on" />
-        </LinearLayout>
-
-        <!-- 壁纸换图间隔（仅壁纸模式可见） -->
-        <LinearLayout style="@style/SettingsRowV2"
-            android:id="@+id/wallpaperIntervalRow"
-            android:layout_marginTop="10dp"
-            android:focusable="false"
-            android:clickable="false"
-            android:visibility="gone">
-            <TextView style="@style/SettingsRowLabel"
-                android:text="换图间隔" />
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <TextView android:id="@+id/wpEveryTime"
-                    style="@style/SettingsSegment"
-                    android:layout_width="wrap_content"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:text="每次" />
-                <TextView android:id="@+id/wp1h"
-                    style="@style/SettingsSegment"
-                    android:layout_width="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:text="1小时" />
-                <TextView android:id="@+id/wp1d"
-                    style="@style/SettingsSegment"
-                    android:layout_width="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:text="1天" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- 立即换一张（仅壁纸模式可见）：预览/手动换 -->
-        <LinearLayout style="@style/SettingsRowV2"
-            android:id="@+id/wpNextChoice"
-            android:layout_marginTop="10dp"
-            android:visibility="gone">
-            <TextView style="@style/SettingsRowLabel"
-                android:text="立即换一张" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="›"
-                android:textColor="#66FFFFFF"
-                android:textSize="24sp" />
-        </LinearLayout>
-
-        <!-- 预览屏保（两种模式都能用） -->
-        <LinearLayout style="@style/SettingsRowV2"
-            android:id="@+id/previewScreensaverChoice"
-            android:layout_marginTop="10dp">
-            <TextView style="@style/SettingsRowLabel"
-                android:text="预览屏保" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="›"
-                android:textColor="#66FFFFFF"
-                android:textSize="24sp" />
-        </LinearLayout>
-
-        <!-- ========== 组 3：软件更新 ========== -->
-        <TextView
-            style="@style/SettingsGroupTitle"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="32dp"
             android:text="@string/settings_group_update" />
 
-        <!-- 更新方式分段 -->
         <LinearLayout style="@style/SettingsRowV2"
             android:layout_marginTop="12dp"
             android:focusable="false"
@@ -306,7 +195,6 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- 检查更新入口 -->
         <LinearLayout style="@style/SettingsRowV2"
             android:id="@+id/checkUpdateChoice"
             android:layout_marginTop="10dp">
@@ -320,16 +208,30 @@
                 android:textSize="24sp" />
         </LinearLayout>
 
-        <!-- ========== 组 3.5：存储与清理（2026-10-23 K：快传 + 自动清理 + 白名单） ========== -->
+        <!-- ========== 组 5：存储与清理（内存清理独立页 + 快传） ========== -->
         <TextView
             style="@style/SettingsGroupTitle"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="32dp"
             android:text="存储与清理" />
 
-        <!-- 快传：手机浏览器打开电视地址上传 APK 直接装 -->
+        <LinearLayout style="@style/SettingsRowV2"
+            android:id="@+id/memoryEntry"
+            android:layout_marginTop="12dp">
+            <TextView style="@style/SettingsRowLabel"
+                android:text="内存清理" />
+            <TextView android:id="@+id/memoryEntryValue" style="@style/SettingsRowValue"
+                android:text="@string/off" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="›"
+                android:textColor="#66FFFFFF"
+                android:textSize="24sp" />
+        </LinearLayout>
+
         <LinearLayout style="@style/SettingsRowV2"
             android:id="@+id/quickTransferChoice"
-            android:layout_marginTop="12dp">
+            android:layout_marginTop="10dp">
             <TextView style="@style/SettingsRowLabel"
                 android:text="快传（手机推 APK 到电视）" />
             <TextView
@@ -340,89 +242,12 @@
                 android:textSize="24sp" />
         </LinearLayout>
 
-        <!-- 自动清理内存开关 -->
-        <LinearLayout style="@style/SettingsRowV2"
-            android:id="@+id/autoCleanChoice"
-            android:layout_marginTop="10dp">
-            <TextView style="@style/SettingsRowLabel"
-                android:text="自动清理内存" />
-            <TextView android:id="@+id/autoCleanValue" style="@style/SettingsRowValue"
-                android:text="@string/off" />
-        </LinearLayout>
-
-        <!-- 清理间隔分段（仅开启时可见） -->
-        <LinearLayout style="@style/SettingsRowV2"
-            android:id="@+id/autoCleanIntervalRow"
-            android:layout_marginTop="10dp"
-            android:focusable="false"
-            android:clickable="false"
-            android:visibility="gone">
-            <TextView style="@style/SettingsRowLabel"
-                android:text="清理间隔" />
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <TextView android:id="@+id/interval30"
-                    style="@style/SettingsSegment"
-                    android:layout_width="wrap_content"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:text="30分钟" />
-                <TextView android:id="@+id/interval60"
-                    style="@style/SettingsSegment"
-                    android:layout_width="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:text="1小时" />
-                <TextView android:id="@+id/interval180"
-                    style="@style/SettingsSegment"
-                    android:layout_width="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:text="3小时" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- 白名单管理：已安装应用列表，确认键加/移出白名单 -->
-        <LinearLayout style="@style/SettingsRowV2"
-            android:id="@+id/cleanWhitelistChoice"
-            android:layout_marginTop="10dp"
-            android:visibility="gone">
-            <TextView style="@style/SettingsRowLabel"
-                android:text="清理白名单（这些 App 不会被清）" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="›"
-                android:textColor="#66FFFFFF"
-                android:textSize="24sp" />
-        </LinearLayout>
-
-        <!-- 立即清理一次 -->
-        <LinearLayout style="@style/SettingsRowV2"
-            android:id="@+id/cleanNowChoice"
-            android:layout_marginTop="10dp"
-            android:visibility="gone">
-            <TextView style="@style/SettingsRowLabel"
-                android:text="立即清理一次" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="›"
-                android:textColor="#66FFFFFF"
-                android:textSize="24sp" />
-        </LinearLayout>
-
-        <!-- ========== 组 4：系统 ========== -->
+        <!-- ========== 组 6：系统 ========== -->
         <TextView
             style="@style/SettingsGroupTitle"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="32dp"
             android:text="@string/settings_group_system" />
 
-        <!-- 设置为默认桌面 -->
         <LinearLayout style="@style/SettingsRowV2"
             android:id="@+id/defaultHomeChoice"
             android:layout_marginTop="12dp">
@@ -436,7 +261,6 @@
                 android:textSize="24sp" />
         </LinearLayout>
 
-        <!-- 系统设置 -->
         <LinearLayout style="@style/SettingsRowV2"
             android:id="@+id/tvSettingsChoice"
             android:layout_marginTop="10dp">

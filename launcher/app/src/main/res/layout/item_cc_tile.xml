@@ -2,8 +2,8 @@
 <!-- 控制中心图标磁贴布局（K 2026-10-22）：64dp 圆角方块，图标居中 + 名称。
      焦点态文字变黑（配白底），跟 iOS 控制中心一致。 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="84dp"
-    android:layout_height="96dp"
+    android:layout_width="88dp"
+    android:layout_height="84dp"
     android:orientation="vertical"
     android:gravity="center_horizontal"
     android:paddingTop="4dp"
@@ -12,31 +12,31 @@
 
     <FrameLayout
         android:id="@+id/tileIconBg"
-        android:layout_width="68dp"
-        android:layout_height="68dp"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
         android:background="@drawable/cc_tile_bg"
         android:gravity="center"
         android:duplicateParentState="true">
 
         <ImageView
             android:id="@+id/tileIcon"
-            android:layout_width="34dp"
-            android:layout_height="34dp"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
             android:layout_gravity="center"
             android:contentDescription="@null" />
     </FrameLayout>
 
     <TextView
         android:id="@+id/tileLabel"
-        android:layout_width="84dp"
+        android:layout_width="88dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="5dp"
         android:gravity="center"
         android:singleLine="true"
         android:ellipsize="end"
-        android:textColor="#E0FFFFFF"
+        android:textColor="#B3FFFFFF"
         android:duplicateParentState="true"
-        android:textSize="13.5sp"
-        android:letterSpacing="0.02"
-        android:fontFamily="@font/outfit_medium" />
+        android:textSize="12sp"
+        android:letterSpacing="0.01"
+        android:fontFamily="@font/outfit_regular" />
 </LinearLayout>

@@ -124,8 +124,10 @@ public class QuickTransferServer {
             if ("GET".equals(method) || "HEAD".equals(method)) {
                 byte[] body = uploadPage().getBytes("UTF-8");
                 writeHeader(out, 200, body.length);
+                out.flush();
                 if (!"HEAD".equals(method)) out.write(body);
                 out.flush();
+                s.shutdownOutput();
                 s.close();
                 return;
             }

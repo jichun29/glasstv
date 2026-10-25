@@ -106,6 +106,21 @@ public final class Weather {
         refreshIfStale();
     }
 
+    /**
+     * 换城市后强制重取：清掉旧坐标与旧读数，并绕过「刚取过就别再取」的节流。
+     * 只清 lat/lon/place 不够——init() 里 3 小时内的旧读数还会被当成有效值直接显示。
+     */
+    public static void forceRefresh(Context ctx) {
+        if (app == null) app = ctx.getApplicationContext();
+        if (prefs == null) prefs = app.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        prefs.edit().remove("lat").remove("lon").remove("place")
+                .remove("fetched_at").remove("kind").apply();
+        current = null;
+        lastAttempt = 0;
+        failed = false;
+        refresh();
+    }
+
     public static void refreshIfStale() {
         if (app == null) return;
         long since = System.currentTimeMillis() - lastAttempt;

@@ -38,6 +38,10 @@ final class Config {
     static final String WALLPAPER_CHOICE_KEY = "wallpaper_choice";
     /** 时间与天气字号档位（0 标准 / 1 大 / 2 特大），电视端选择，覆盖主题。 */
     static final String HEADER_SIZE_KEY = "header_size";
+    /** 天气城市（电视端手填，空 = 自动定位），覆盖主题里的 weather_city。 */
+    static final String WEATHER_CITY_KEY = "weather_city";
+    /** 背景颜色（纯色底，壁纸缺失或关掉时才看得见），电视端选择，覆盖主题。 */
+    static final String BACKGROUND_COLOR_KEY = "background_color";
     private static final String THEME_REVISION_NAME = "theme_revision";
     private static final String THEME_SIGNATURE_KEY = "theme_signature";
 
@@ -198,6 +202,19 @@ final class Config {
         this.weatherCity = weatherCity;
     }
 
+    /** 电视端手填的天气城市；null = 没填过，交回主题/自动定位。 */
+    static String weatherCityOverride(Context ctx) {
+        String v = ctx.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE)
+                .getString(WEATHER_CITY_KEY, null);
+        return v == null ? null : v.trim();
+    }
+
+    /** 电视端选的背景色；没选过返回 Integer.MIN_VALUE（= 跟随主题）。 */
+    static int backgroundColorOverride(Context ctx) {
+        return ctx.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE)
+                .getInt(BACKGROUND_COLOR_KEY, Integer.MIN_VALUE);
+    }
+
     /** 时间与天气字号档位：0 标准 / 1 大 / 2 特大。范围外的值一律回标准档。 */
     static int headerSize(Context ctx) {
         int v = ctx.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE)
@@ -315,6 +332,11 @@ final class Config {
         if (chosenColumns >= 4 && chosenColumns <= 7) columns = chosenColumns;
         int chosenRows = choices.getInt(ROWS_BELOW_DOCK_KEY, rowsBelow);
         if (chosenRows >= 0 && chosenRows <= 3) rowsBelow = chosenRows;
+        // 电视端手填的天气城市、选的背景色同字号一样压过主题（没设过就维持主题值）。
+        String tvCity = choices.getString(WEATHER_CITY_KEY, null);
+        if (tvCity != null) weatherCity = tvCity.trim();
+        int tvBackground = choices.getInt(BACKGROUND_COLOR_KEY, Integer.MIN_VALUE);
+        if (tvBackground != Integer.MIN_VALUE) background = tvBackground;
         animations = choices.getBoolean("animations", animations);
         advancedEffects = choices.getBoolean("advanced_effects", advancedEffects);
         // 减弱动画：遥控器上可切换（tvhome-zh v1.4.1 移植），电视端选择覆盖 config.xml / 主题

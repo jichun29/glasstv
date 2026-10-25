@@ -24,7 +24,13 @@ public final class LauncherSettingsActivity extends Activity {
     private final TextView[] columnChoices = new TextView[4];
     private final TextView[] rowChoices = new TextView[4];
     private final TextView[] headerSizeChoices = new TextView[3];
+    private final TextView[] bgColorChoices = new TextView[4];
     private int headerSize;
+    /** 背景色四选一，顺序与布局里的 bgColor0..3 一致（默认值来自主题，见 Config）。 */
+    private static final int[] BG_COLORS = {0xFF000000, 0xFF101B2E, 0xFF2B0D17, 0xFF283039};
+    private String weatherCity;
+    private TextView weatherCityValue;
+    private int backgroundColor;
     private View animationsChoice;
     private TextView animationsValue;
     private View motionChoice;
@@ -104,6 +110,27 @@ public final class LauncherSettingsActivity extends Activity {
             });
         }
 
+        // ===== 天气城市（2026-10-25 合并二开版）：点开弹输入框，留空 = 自动定位 =====
+        weatherCityValue = findViewById(R.id.weatherCityValue);
+        String tvCity = Config.weatherCityOverride(this);
+        weatherCity = tvCity != null ? tvCity : config.weatherCity;
+        findViewById(R.id.weatherCityChoice).setOnClickListener(v -> showCityDialog());
+
+        // ===== 背景颜色（壁纸关掉/缺图时才看得见） =====
+        backgroundColor = Config.load(this).backgroundColor;
+        int[] bgIds = {R.id.bgColor0, R.id.bgColor1, R.id.bgColor2, R.id.bgColor3};
+        for (int i = 0; i < bgIds.length; i++) {
+            final int value = BG_COLORS[i];
+            bgColorChoices[i] = findViewById(bgIds[i]);
+            bgColorChoices[i].setOnClickListener(v -> {
+                if (backgroundColor == value) return;
+                backgroundColor = value;
+                choices.edit().putInt(Config.BACKGROUND_COLOR_KEY, value).apply();
+                setResult(RESULT_OK);
+                refresh();
+            });
+        }
+
         // ===== 外观：壁纸 / 屏保（各自独立页） =====
         wallpaperEntryValue = findViewById(R.id.wallpaperEntryValue);
         screensaverEntryValue = findViewById(R.id.screensaverEntryValue);
@@ -164,6 +191,8 @@ public final class LauncherSettingsActivity extends Activity {
             choices.edit().remove("columns").remove(Config.ROWS_BELOW_DOCK_KEY).remove("animations")
                     .remove("advanced_effects").remove("reduced_motion")
                     .remove(Config.HEADER_SIZE_KEY)
+                    .remove(Config.WEATHER_CITY_KEY)
+                    .remove(Config.BACKGROUND_COLOR_KEY)
                     .remove(Config.WALLPAPER_CHOICE_KEY).commit();
             Config current = Config.load(this);
             columns = current.columns;
@@ -172,6 +201,9 @@ public final class LauncherSettingsActivity extends Activity {
             advancedEffects = current.animations && current.advancedEffects;
             reducedMotion = current.reducedMotion;
             headerSize = Config.headerSize(this);
+            String backCity = Config.weatherCityOverride(this);
+            weatherCity = backCity != null ? backCity : current.weatherCity;
+            backgroundColor = current.backgroundColor;
             setResult(RESULT_OK);
             refresh();
         });
@@ -206,6 +238,38 @@ public final class LauncherSettingsActivity extends Activity {
         columnChoices[Math.max(0, Math.min(columns - 4, 3))].requestFocus();
     }
 
+    /**
+     * 天气城市输入框。做在弹窗里而不是列表行里，是因为 D-pad 在输入框里要能输入中文，
+     * 电视上唯一顺手的做法就是弹一个系统输入框。留空 = 交回自动定位。
+     */
+    private void showCityDialog() {
+        final android.widget.EditText input = new android.widget.EditText(this);
+        input.setSingleLine(true);
+        input.setFilters(new android.text.InputFilter[]{
+                new android.text.InputFilter.LengthFilter(20)});
+        input.setText(weatherCity == null ? "" : weatherCity);
+        input.setSelection(input.length());
+        input.setHint("留空 = 自动定位");
+        int pad = Math.round(24 * getResources().getDisplayMetrics().density);
+        input.setPadding(pad, pad, pad, pad);
+
+        new android.app.AlertDialog.Builder(this)
+                .setTitle("天气城市")
+                .setView(input)
+                .setPositiveButton("确定", (dialog, which) -> {
+                    String city = input.getText().toString().trim();
+                    if (city.isEmpty()) choices.edit().remove(Config.WEATHER_CITY_KEY).apply();
+                    else choices.edit().putString(Config.WEATHER_CITY_KEY, city).apply();
+                    weatherCity = city;
+                    setResult(RESULT_OK);
+                    // 换城市必须强制重取：旧坐标和 3 小时内的旧读数都得作废，否则界面还是旧城市
+                    Weather.forceRefresh(getApplicationContext());
+                    refresh();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
     private void reverseRow(TextView[] views) {
         android.widget.LinearLayout row = (android.widget.LinearLayout) views[0].getParent();
         row.removeAllViews();
@@ -236,6 +300,13 @@ public final class LauncherSettingsActivity extends Activity {
         }
         for (int i = 0; i < headerSizeChoices.length; i++) {
             if (headerSizeChoices[i] != null) headerSizeChoices[i].setSelected(headerSize == i);
+        }
+        for (int i = 0; i < bgColorChoices.length; i++) {
+            if (bgColorChoices[i] != null) bgColorChoices[i].setSelected(backgroundColor == BG_COLORS[i]);
+        }
+        if (weatherCityValue != null) {
+            weatherCityValue.setText(weatherCity == null || weatherCity.isEmpty()
+                    ? "自动定位" : weatherCity);
         }
         // 开关：只更新右侧的「开/关」值，行标签留在 XML 里
         animationsValue.setText(animations ? R.string.on : R.string.off);
@@ -276,6 +347,8 @@ public final class LauncherSettingsActivity extends Activity {
                 || choices.contains("animations") || choices.contains("advanced_effects")
                 || choices.contains("reduced_motion")
                 || choices.contains(Config.HEADER_SIZE_KEY)
+                || choices.contains(Config.WEATHER_CITY_KEY)
+                || choices.contains(Config.BACKGROUND_COLOR_KEY)
                 || choices.contains(Config.WALLPAPER_CHOICE_KEY);
     }
 }

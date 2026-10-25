@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 翻页时钟屏保（2026-10-25 K 定稿样式）：照爆款 Fliqlo ——
-     两块大牌子（小时 / 分钟）并排居中、无冒号、无外层衬板，下方天气+地区、年月日+周几。
-     牌子在代码里生成（FlipCard），这里只放容器和两行信息。 -->
+<!-- 翻页时钟屏保（4.0.4 视觉配比）：照爆款 Fliqlo ——
+     两块大牌子（小时 / 分钟）并排居中、无冒号、无外层衬板。
+     牌子是主角，牌子在代码里生成（FlipCard）；下面只有一行脚注（天气 + 月日周几），
+     字号统一、颜色压暗，只做配角 —— 分两行会让画面读成「钟 + 第二段内容」。 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/flipRoot"
     android:layout_width="match_parent"
@@ -23,26 +24,17 @@
             android:orientation="horizontal"
             android:gravity="center_vertical" />
 
+        <!-- 一行脚注：宜昌 24° 雨 · 10月26日 周一
+             取不到天气时整行退化成「10月26日 周一」，不会留下孤零零的分隔点。 -->
         <TextView
-            android:id="@+id/flipWeather"
+            android:id="@+id/flipFootnote"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="44dp"
+            android:layout_marginTop="40dp"
             android:singleLine="true"
-            android:textColor="#CCFFFFFF"
-            android:textSize="27sp"
-            android:letterSpacing="0.06"
-            android:includeFontPadding="false" />
-
-        <TextView
-            android:id="@+id/flipDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:singleLine="true"
-            android:textColor="#94FFFFFF"
+            android:textColor="#C6FFFFFF"
             android:textSize="20sp"
-            android:letterSpacing="0.08"
+            android:letterSpacing="0.10"
             android:includeFontPadding="false" />
     </LinearLayout>
 </FrameLayout>

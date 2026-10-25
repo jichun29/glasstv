@@ -40,6 +40,8 @@ final class Config {
     static final String HEADER_SIZE_KEY = "header_size";
     /** 天气城市（电视端手填，空 = 自动定位），覆盖主题里的 weather_city。 */
     static final String WEATHER_CITY_KEY = "weather_city";
+    /** 翻页时钟屏保的卡片大小：0 小 / 1 中 / 2 大（默认大）。 */
+    static final String FLIP_CARD_SIZE_KEY = "flip_card_size";
     /** 背景颜色（纯色底，壁纸缺失或关掉时才看得见），电视端选择，覆盖主题。 */
     static final String BACKGROUND_COLOR_KEY = "background_color";
     private static final String THEME_REVISION_NAME = "theme_revision";
@@ -220,6 +222,17 @@ final class Config {
         int v = ctx.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE)
                 .getInt(HEADER_SIZE_KEY, 0);
         return v < 0 || v > 2 ? 0 : v;
+    }
+
+    /**
+     * 翻页时钟屏保的卡片大小：0 小 / 1 中 / 2 大，默认 1（中）。
+     * 默认取「中」：4.0.4 里 34% 那版 K 反馈偏大，中档（单块 25% 屏宽）才是合适的第一印象。
+     * 范围外的值一律回「中」。
+     */
+    static int flipCardSize(Context ctx) {
+        int v = ctx.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE)
+                .getInt(FLIP_CARD_SIZE_KEY, 1);
+        return v < 0 || v > 2 ? 1 : v;
     }
 
     /** The folder the theme tools push into; null when external storage is unavailable. */

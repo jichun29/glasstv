@@ -66,6 +66,17 @@ public final class Weather {
         void onWeather(Now now); // null = 无有效读数
     }
 
+    /**
+     * 解绑回调（屏保销毁时必须调）。
+     *
+     * listener 是静态字段，屏保 Activity/Dream 退出后它仍然指着那个已经销毁的界面；
+     * 下一次天气请求回来会往已销毁的 View 上写文本，而且新起的屏保会把它覆盖掉，
+     * 导致「上一屏拿不到天气」。所以退出一律 detach。
+     */
+    public static void detach(Listener l) {
+        if (listener == l) listener = null;
+    }
+
     private static SharedPreferences prefs;
     private static Context app;
     private static Listener listener;

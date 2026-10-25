@@ -348,6 +348,64 @@
                 android:fontFamily="@font/outfit_regular" />
         </FrameLayout>
 
+        <!-- 卡片大小（仅翻页时钟屏保时出现） -->
+        <TextView
+            android:id="@+id/pzFlipSizeLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="48dp"
+            android:layout_marginTop="398dp"
+            android:text="卡片大小"
+            android:textColor="#66FFFFFF"
+            android:textSize="12sp"
+            android:letterSpacing="0.12"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/pzFlipSizeSmall"
+            android:layout_width="96dp"
+            android:layout_height="38dp"
+            android:layout_marginStart="48dp"
+            android:layout_marginTop="420dp"
+            android:gravity="center"
+            android:focusable="true"
+            android:clickable="true"
+            android:background="@drawable/saver_segment"
+            android:text="小"
+            android:textColor="#FFFFFFFF"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/pzFlipSizeMedium"
+            android:layout_width="96dp"
+            android:layout_height="38dp"
+            android:layout_marginStart="152dp"
+            android:layout_marginTop="420dp"
+            android:gravity="center"
+            android:focusable="true"
+            android:clickable="true"
+            android:background="@drawable/saver_segment"
+            android:text="中"
+            android:textColor="#FFFFFFFF"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/pzFlipSizeLarge"
+            android:layout_width="96dp"
+            android:layout_height="38dp"
+            android:layout_marginStart="256dp"
+            android:layout_marginTop="420dp"
+            android:gravity="center"
+            android:focusable="true"
+            android:clickable="true"
+            android:background="@drawable/saver_segment"
+            android:text="大"
+            android:textColor="#FFFFFFFF"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
         <!-- 换图间隔（仅壁纸屏保 + 屏保开启时出现） -->
         <TextView
             android:id="@+id/pzIntervalLabel"

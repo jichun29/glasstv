@@ -74,6 +74,9 @@ public final class PersonalizeActivity extends Activity {
     private View intervalLabel;
     private View previewButton;
     private View[] segments;
+    /** 翻页时钟的卡片大小：标签 + 小 / 中 / 大三个分段。 */
+    private View flipSizeLabel;
+    private View[] flipSizeSegments;
     private View nextImage;
 
     private ScrollView scroll;
@@ -130,6 +133,9 @@ public final class PersonalizeActivity extends Activity {
         column = findViewById(R.id.pzWallpaperColumn);
         segments = new View[]{findViewById(R.id.pzEveryTime),
                 findViewById(R.id.pzEvery1h), findViewById(R.id.pzEvery1d)};
+        flipSizeLabel = findViewById(R.id.pzFlipSizeLabel);
+        flipSizeSegments = new View[]{findViewById(R.id.pzFlipSizeSmall),
+                findViewById(R.id.pzFlipSizeMedium), findViewById(R.id.pzFlipSizeLarge)};
 
         readWallpaperState();
         buildWallpaperGrid();
@@ -580,6 +586,37 @@ public final class PersonalizeActivity extends Activity {
         });
         nextImage.setOnKeyListener((v, key, event) -> bottomKeys(key, event, false));
 
+        // 卡片大小：小 / 中 / 大。跟「换图间隔」同一行位置，两排互斥显示不会有视觉冲突。
+        for (int i = 0; i < flipSizeSegments.length; i++) {
+            final int size = i;
+            flipSizeSegments[i].setOnClickListener(v -> {
+                choices.edit().putInt(Config.FLIP_CARD_SIZE_KEY, size).apply();
+                android.util.Log.i("FlipScene", "click size=" + size
+                        + " readBack=" + Config.flipCardSize(this));
+                refreshScreensaver();
+                setResult(RESULT_OK);
+            });
+            flipSizeSegments[i].setOnFocusChangeListener((v, f) ->
+                    ((TextView) v).setTextColor(f ? 0xFFFFFFFF
+                            : (v.isSelected() ? 0xFF14171C : 0xFFFFFFFF)));
+            flipSizeSegments[i].setOnKeyListener((v, key, event) -> {
+                if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
+                if (key == KeyEvent.KEYCODE_DPAD_UP) { saverFlip.requestFocus(); return true; }
+                if (key == KeyEvent.KEYCODE_DPAD_DOWN) { previewButton.requestFocus(); return true; }
+                if (key == KeyEvent.KEYCODE_DPAD_LEFT) {
+                    if (size == 0) saverFlip.requestFocus();
+                    else flipSizeSegments[size - 1].requestFocus();
+                    return true;
+                }
+                if (key == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                    if (size < flipSizeSegments.length - 1) flipSizeSegments[size + 1].requestFocus();
+                    else previewButton.requestFocus();
+                    return true;
+                }
+                return false;
+            });
+        }
+
         previewButton.setOnClickListener(v -> startActivity(ClockActivity.launch(this)));
         previewButton.setOnFocusChangeListener((v, f) -> {
             ((TextView) previewButton).setTextColor(f ? 0xFF14171C : 0xFFFFFFFF);
@@ -593,8 +630,9 @@ public final class PersonalizeActivity extends Activity {
         if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
         if (key == KeyEvent.KEYCODE_DPAD_UP) { tabSaver.requestFocus(); return true; }
         if (key == KeyEvent.KEYCODE_DPAD_DOWN) {
-            // 从卡片往下进「换图间隔」行，落在第一个「每次」上（跟视觉从左到右一致）
-            if (segments[0].getVisibility() == View.VISIBLE) segments[0].requestFocus();
+            // 从卡片往下进「卡片大小」（翻页时钟时）或「换图间隔」，落在第一个分段上
+            if (flipSizeSegments[0].getVisibility() == View.VISIBLE) flipSizeSegments[0].requestFocus();
+            else if (segments[0].getVisibility() == View.VISIBLE) segments[0].requestFocus();
             else previewButton.requestFocus();
             return true;
         }
@@ -614,6 +652,7 @@ public final class PersonalizeActivity extends Activity {
         if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
         if (key == KeyEvent.KEYCODE_DPAD_UP) {
             if (segments[0].getVisibility() == View.VISIBLE) segments[1].requestFocus();
+            else if (flipSizeSegments[1].getVisibility() == View.VISIBLE) flipSizeSegments[1].requestFocus();
             else saverBing.requestFocus();
             return true;
         }
@@ -621,7 +660,9 @@ public final class PersonalizeActivity extends Activity {
         if (key == KeyEvent.KEYCODE_DPAD_LEFT) {
             if (!first && nextImage.getVisibility() == View.VISIBLE) previewButton.requestFocus();
             else if (segments[0].getVisibility() == View.VISIBLE) segments[segments.length - 1].requestFocus();
-            else saverClock.requestFocus();
+            else if (flipSizeSegments[0].getVisibility() == View.VISIBLE) {
+                flipSizeSegments[flipSizeSegments.length - 1].requestFocus();
+            } else saverClock.requestFocus();
             return true;
         }
         if (key == KeyEvent.KEYCODE_DPAD_RIGHT) {
@@ -676,6 +717,19 @@ public final class PersonalizeActivity extends Activity {
         intervalLabel.setVisibility(visibility);
         for (View segment : segments) segment.setVisibility(visibility);
         nextImage.setVisibility(visibility);
+
+        // 卡片大小只在「翻页时钟 + 屏保开着」时出现：别的样式没有翻页牌，摆着是噪声。
+        int flipSizeVisibility = (flip && enabled) ? View.VISIBLE : View.GONE;
+        if (flipSizeLabel != null) {
+            flipSizeLabel.setVisibility(flipSizeVisibility);
+            for (View segment : flipSizeSegments) segment.setVisibility(flipSizeVisibility);
+            int size = Config.flipCardSize(this);
+            for (int i = 0; i < flipSizeSegments.length; i++) {
+                boolean selected = i == size;
+                flipSizeSegments[i].setSelected(selected);
+                ((TextView) flipSizeSegments[i]).setTextColor(selected ? 0xFF14171C : 0xFFFFFFFF);
+            }
+        }
 
         int current = choices.getInt("screensaver_interval_min", 60);
         for (int i = 0; i < segments.length; i++) {

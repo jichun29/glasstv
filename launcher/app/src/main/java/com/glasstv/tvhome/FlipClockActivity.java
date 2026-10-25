@@ -16,6 +16,8 @@ import android.view.View;
 public class FlipClockActivity extends Activity {
 
     private FlipScene scene;
+    /** 存成字段才能 detach：每次 init 传新 lambda 是另一个实例，退不掉旧的。 */
+    private Weather.Listener weatherListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,9 +27,10 @@ public class FlipClockActivity extends Activity {
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE);
 
         scene = new FlipScene(this, getWindow().getDecorView());
-        Weather.init(this, now -> {
+        weatherListener = now -> {
             if (scene != null) scene.setWeather(now);
-        });
+        };
+        Weather.init(this, weatherListener);
     }
 
     @Override
@@ -44,8 +47,20 @@ public class FlipClockActivity extends Activity {
     }
 
     @Override
+    protected void onDestroy() {
+        // 屏保销毁后把静态天气回调解掉：否则下一次请求回来会往已销毁的 View 写文本，
+        // 并且新起的屏保会因为「回调被旧实例占着」而在第一屏拿不到天气。
+        Weather.detach(weatherListener);
+        weatherListener = null;
+        scene = null;
+        super.onDestroy();
+    }
+
+    @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if (event.getAction() == KeyEvent.ACTION_UP) finish();
+        // 只在按下时退一次：ACTION_UP 也退会让长按/连发多次走 finish()，
+        // 虽然 Activity 已经 finishing 不会再崩，但会跟淡出动画抢一次转场。
+        if (event.getAction() == KeyEvent.ACTION_DOWN) finish();
         return true;
     }
 

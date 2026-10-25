@@ -17,6 +17,7 @@
 >
 > 小米国行电视实测可用（MiTV-ASTP0 / Android 9），理论上所有 Android TV 4.4+ 都能跑。
 
+- 官网：**https://tv.jichun29.cn**（静态站，源码在 [glasstv-site](https://github.com/jichun29/glasstv-site)，本仓库 `site/` 是同一份）
 - 源码：https://github.com/jichun29/glasstv
 - 下载：见 [Releases](https://github.com/jichun29/glasstv/releases)
 

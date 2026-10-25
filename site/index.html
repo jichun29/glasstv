@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GlassTV · 给电视一块干净的玻璃桌面</title>
+<meta name="description" content="基于 CleanYourTV 深度定制的开源 Android TV 桌面：半透明玻璃质感、无广告无推荐流、可换壁纸、控制中心、自动清理内存。支持小米等国产电视，也适配 Android 4.4 老盒子。">
+<meta name="theme-color" content="#0a0a0b">
+<meta property="og:title" content="GlassTV · 给电视一块干净的玻璃桌面">
+<meta property="og:description" content="开源 Android TV 桌面。没有广告，没有推荐流，只有你的 App 和壁纸。">
+<meta property="og:image" content="img/home.jpg">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#top">
+      <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="2" y="4" width="28" height="20" rx="4" fill="none" stroke="currentColor" stroke-width="2.4"/>
+        <path d="M16 24v4M10 28h12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M7 9h18v10H7z" fill="currentColor" opacity=".22"/>
+      </svg>
+      GlassTV
+    </a>
+    <div class="links">
+      <a href="#features">功能</a>
+      <a href="#shots">截图</a>
+      <a href="#install">安装</a>
+      <a href="#faq">常见问题</a>
+      <a href="https://github.com/jichun29/glasstv" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <a class="cta" href="#install">下载</a>
+  </div>
+</nav>
+
+<header id="top">
+  <div class="wrap">
+    <p class="eyebrow">开源 · 免费 · 无广告</p>
+    <h1>GlassTV</h1>
+    <p class="lede">给电视一块<strong>干净的玻璃桌面</strong>。<br>打开就是你的应用和壁纸，没有会员推荐，没有开机广告位。</p>
+    <div class="actions">
+      <a class="btn primary" href="#install">开始安装</a>
+      <a class="btn ghost" href="https://github.com/jichun29/glasstv" target="_blank" rel="noopener">在 GitHub 查看</a>
+    </div>
+    <figure class="hero-shot">
+      <img src="img/home.jpg" alt="GlassTV 桌面主页：森林壁纸、左上角时间天气、底部一排应用" width="1280" height="720">
+      <figcaption>首页 · 壁纸 / 时间天气 / 应用栏</figcaption>
+    </figure>
+  </div>
+</header>
+
+<section id="features">
+  <div class="wrap">
+    <div class="head">
+      <h2>安静，<br>是最好的界面。</h2>
+      <p>所有功能收进一个控制中心，桌面上只留你每天要看的东西。</p>
+    </div>
+
+    <div class="grid">
+      <article class="card">
+        <h3>半透明玻璃质感</h3>
+        <p>应用栏、控制中心、设置页统一毛玻璃；焦点靠描边提亮，不靠五颜六色的磁贴。</p>
+      </article>
+      <article class="card">
+        <h3>控制中心</h3>
+        <p>右上角一个按钮：信号源、网络、系统设置、桌面设置、屏保、壁纸、内存清理、检查更新、关于。</p>
+      </article>
+      <article class="card">
+        <h3>11 张内置壁纸</h3>
+        <p>自然风景、跑车、卡通、清简四组，4 列缩略图挑一张就换；也能开轮播或每日必应。</p>
+      </article>
+      <article class="card">
+        <h3>时间与天气</h3>
+        <p>字号标准/大/特大三档，天气城市可手填也可留空自动定位，背景颜色四档可选。</p>
+      </article>
+      <article class="card">
+        <h3>自动清理内存</h3>
+        <p>按间隔清理后台，白名单保住你要常驻的应用；也能随时手动清一次。</p>
+      </article>
+      <article class="card">
+        <h3>手机快传安装</h3>
+        <p>不用 U 盘：桌面开一个局域网网页，手机扫码把 APK 直接推进电视。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="shots" class="alt">
+  <div class="wrap">
+    <div class="head">
+      <h2>看真机，<br>不看渲染图。</h2>
+      <p>以下都是小米电视上实拍的界面。</p>
+    </div>
+    <div class="shots">
+      <figure>
+        <img src="img/control-center.jpg" alt="控制中心：九宫格入口与版本号" loading="lazy" width="1280" height="720">
+        <figcaption>控制中心</figcaption>
+      </figure>
+      <figure>
+        <img src="img/wallpaper.jpg" alt="壁纸页：四列缩略图与分组" loading="lazy" width="1280" height="720">
+        <figcaption>壁纸选择</figcaption>
+      </figure>
+      <figure>
+        <img src="img/settings.jpg" alt="桌面设置：布局、外观、时间与天气" loading="lazy" width="1280" height="720">
+        <figcaption>桌面设置</figcaption>
+      </figure>
+      <figure>
+        <img src="img/wallpaper-page.jpg" alt="壁纸页全貌" loading="lazy" width="1280" height="720">
+        <figcaption>壁纸页全貌</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap narrow">
+    <div class="head">
+      <h2>三步装好</h2>
+      <p>不用 root，不用刷机，不改系统分区。</p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h3>下载对应版本</h3>
+        <p>Android 5.0 及以上用通用版；老盒子（4.4）用精简版。</p>
+        <div class="dl">
+          <a class="btn primary" href="https://github.com/jichun29/glasstv/releases/latest/download/GlassTV-Launcher-universal.apk">下载通用版 APK</a>
+          <a class="btn ghost" href="https://github.com/jichun29/glasstv/releases/latest/download/GlassTV-Launcher-lite44.apk">下载 4.4 精简版</a>
+        </div>
+        <p class="hint">也可以到 <a href="https://github.com/jichun29/glasstv/releases" target="_blank" rel="noopener">GitHub Releases</a> 下载最新版。</p>
+      </li>
+      <li>
+        <h3>装到电视上</h3>
+        <p>U 盘拷进去用电视的文件管理器安装；或者用手机通过「快传」直接推过去。</p>
+      </li>
+      <li>
+        <h3>设成默认桌面</h3>
+        <p>按遥控器 Home 键，在弹出列表里选 GlassTV，勾选「始终」。之后开机直接进它。</p>
+      </li>
+    </ol>
+
+    <div class="note">
+      <strong>从 CleanYourTV 升级过来？</strong>
+      GlassTV 从 4.0.0 起换了应用身份（包名 <code>com.glasstv.tvhome</code>），
+      和旧版可以并存。旧版布局不会自动迁移，建议装好新版、确认没问题后再卸载旧版。
+    </div>
+  </div>
+</section>
+
+<section id="faq" class="alt">
+  <div class="wrap narrow">
+    <div class="head">
+      <h2>常见问题</h2>
+    </div>
+
+    <details>
+      <summary>会不会把电视原有桌面删掉？</summary>
+      <p>不会。原桌面只是不再当默认，随时按 Home 键切回去。</p>
+    </details>
+    <details>
+      <summary>支持哪些电视？</summary>
+      <p>Android TV / Google TV 以及国产安卓电视都可以，小米电视已实测。Android 4.4 的老盒子用精简版。</p>
+    </details>
+    <details>
+      <summary>精简版少了什么？</summary>
+      <p>去掉必应每日壁纸、视频壁纸、在线壁纸这些吃内存的功能，其余（壁纸、自动清理、控制中心、设置）都在。</p>
+    </details>
+    <details>
+      <summary>天气不显示 / 城市不对？</summary>
+      <p>桌面设置 → 时间与天气 → 天气城市，填中文城市名；留空则自动定位（需要给应用位置权限）。</p>
+    </details>
+    <details>
+      <summary>能自己改壁纸吗？</summary>
+      <p>可以。壁纸页选内置图，或把图片放进电视的配置目录（见仓库 README）。</p>
+    </details>
+    <details>
+      <summary>怎么更新？</summary>
+      <p>控制中心 → 检查更新，会读 GitHub Releases 的最新版本自动下载安装。</p>
+    </details>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="fleft">
+      <div class="brand">
+        <svg width="18" height="18" viewBox="0 0 32 32" aria-hidden="true">
+          <rect x="2" y="4" width="28" height="20" rx="4" fill="none" stroke="currentColor" stroke-width="2.4"/>
+          <path d="M16 24v4M10 28h12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+        </svg>
+        GlassTV
+      </div>
+      <p>基于 <a href="https://github.com/Gathin23/cleanyourtv" target="_blank" rel="noopener">CleanYourTV</a> 深度定制的开源电视桌面，MIT 许可。</p>
+    </div>
+    <div class="fright">
+      <a href="https://github.com/jichun29/glasstv" target="_blank" rel="noopener">源码</a>
+      <a href="https://github.com/jichun29/glasstv/releases" target="_blank" rel="noopener">版本记录</a>
+      <a href="https://github.com/jichun29/glasstv">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

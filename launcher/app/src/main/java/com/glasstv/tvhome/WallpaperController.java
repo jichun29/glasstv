@@ -193,6 +193,18 @@ final class WallpaperController {
     static int groupStart(int g) { return GROUP_FROM[g]; }
     static int groupEnd(int g) { return GROUP_TO[g]; }
 
+    /** 预览用的小图（8 倍降采样，约 240×135），桌面设置右侧预览专用；失败返回 null。 */
+    static Bitmap previewImage(Context ctx, int n) {
+        if (n < 0 || n >= FILES.length) return null;
+        try (InputStream input = ctx.getAssets().open("wallpapers/" + FILES[n] + ".jpg")) {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inSampleSize = 8;
+            return BitmapFactory.decodeStream(input, null, options);
+        } catch (IOException | OutOfMemoryError e) {
+            return null;
+        }
+    }
+
     /** 缩略图（4 倍降采样），供合并页的格子直接画；失败返回 null 由调用方留空。 */
     static Bitmap thumbFor(Context ctx, int n) {
         try (InputStream input = ctx.getAssets().open("wallpapers/" + FILES[n] + ".jpg")) {

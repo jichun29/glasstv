@@ -100,6 +100,49 @@
         <item name="android:focusable">true</item>
         <item name="android:clickable">true</item>
     </style>
+    <!-- ===== 桌面设置页 v3（2026-10-26 分栏 + 实时预览）===== -->
+    <!-- 一行「标签 + 控件」的卡片：标签在上面一行，控件在下面一行（左列只有 344dp，横排放不下） -->
+    <style name="SettingsCard">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:paddingTop">13dp</item>
+        <item name="android:paddingBottom">13dp</item>
+        <item name="android:background">@drawable/settings_card_bg</item>
+    </style>
+
+    <style name="SettingsCardLabel">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">#E6FFFFFF</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="SettingsCardControls">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">38dp</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <!-- 卡片里的分段项：等分宽度，字多也不会挤爆（老版固定 64dp，中文 4 个字就溢出） -->
+    <style name="SettingsSegmentFlex">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textColor">#FFFFFFFF</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:background">@drawable/settings_segment_bg</item>
+        <item name="android:focusable">true</item>
+        <item name="android:clickable">true</item>
+    </style>
+
     <style name="SettingsColumnChoice" parent="SettingsRow">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_weight">1</item>

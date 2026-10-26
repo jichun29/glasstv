@@ -62,6 +62,11 @@ public final class Weather {
         }
     }
 
+    /** 当前已拿到的读数（可能是缓存），预览/设置页同步读用；没取到过返回 null。 */
+    public static Now cached() {
+        return current;
+    }
+
     /** 自动定位到的城市名（没取到读数时 null），设置页只读展示用。 */
     public static String place() {
         return current != null ? current.place : null;

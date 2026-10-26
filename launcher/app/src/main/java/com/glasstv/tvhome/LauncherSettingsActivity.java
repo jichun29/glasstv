@@ -58,6 +58,8 @@ public final class LauncherSettingsActivity extends Activity {
     private TextView updateAutoChoice;
     private int columns;
     private int rowsBelowDock;
+    /** 右侧实时预览（2026-10-26）：任何一项改动后立刻重画，不用退回桌面看效果。 */
+    private HomePreviewView preview;
     private boolean animations;
     private boolean advancedEffects;
     private boolean reducedMotion;
@@ -66,6 +68,7 @@ public final class LauncherSettingsActivity extends Activity {
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         setContentView(R.layout.activity_launcher_settings);
+        preview = findViewById(R.id.homePreview);
         choices = getSharedPreferences(Config.SETTINGS_NAME, MODE_PRIVATE);
         Config config = Config.load(this);
         columns = config.columns;
@@ -314,6 +317,15 @@ public final class LauncherSettingsActivity extends Activity {
         columnChoices[Math.max(0, Math.min(columns - 4, 3))].requestFocus();
     }
 
+    /**
+     * 回到本页时重画预览：壁纸/屏保页可能刚改过壁纸，天气也可能刚更新。
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (preview != null) preview.refresh();
+    }
+
     /** 12 / 24 小时制：只写一个键，桌面和屏保都读它。 */
     private void setHour12(boolean enabled) {
         if (hour12 == enabled) return;
@@ -399,6 +411,9 @@ public final class LauncherSettingsActivity extends Activity {
         boolean autoUpdate = UpdateChecker.isAutoEnabled(this);
         updateManualChoice.setSelected(!autoUpdate);
         updateAutoChoice.setSelected(autoUpdate);
+
+        // 任何一项改动都会走到这里，预览跟着重画（实时反馈）
+        if (preview != null) preview.refresh();
     }
 
     private boolean hasOnTvChoices() {

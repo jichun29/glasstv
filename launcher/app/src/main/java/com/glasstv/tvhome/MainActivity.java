@@ -59,6 +59,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -156,7 +157,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener, T
     private boolean memoryReleased;
     private TextView greeting;
     private View clockBlock;
+    /** onCreate 时读的配置，applyHeaderLayout 等后置逻辑复用，别反复读 config.json。 */
+    private Config cfg;
     private TextView weatherText;
+    /** 桌面设置里把天气关了：异步回调拿到数据也别自己亮出来（K 2026-10-26）。 */
+    private boolean weatherHiddenByUser;
     private View btnInputs;
     private TextView btnWifi;
     private TextView shamsiDate;
@@ -292,13 +297,14 @@ public class MainActivity extends Activity implements AppAdapter.TileListener, T
         }
     };
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         density = getResources().getDisplayMetrics().density;
         // config.xml, overlaid by config.json from a pushed theme (see Config and tools/theme.sh).
-        Config cfg = Config.load(this);
+        cfg = Config.load(this);
         settingsKeycodes = cfg.settingsKeycodes;
         settingsKeyPanel = cfg.settingsKeyPanel;
         COLUMNS = cfg.columns;
@@ -362,8 +368,6 @@ public class MainActivity extends Activity implements AppAdapter.TileListener, T
         // still follows the dock.
         if (!cfg.dockTitle) hero.setVisibility(View.GONE);
         greeting = findViewById(R.id.greeting);
-        // K 2026-10-23：左上角不显示「上午好/下午好」问候语，只留时间/日期/天气。
-        greeting.setVisibility(View.GONE);
         clockBlock = findViewById(R.id.leftBlock);
         greetingColor = greeting.getCurrentTextColor();
         // 自动清理内存（2026-10-23 K）：设置页开关，开启后按间隔清后台。
@@ -378,7 +382,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener, T
                     weatherText.setVisibility(View.GONE);
                 } else {
                     weatherText.setText(now.label());
-                    weatherText.setVisibility(View.VISIBLE);
+                    // 用户关了天气就别再亮出来（K 2026-10-26）
+                    weatherText.setVisibility(weatherHiddenByUser ? View.GONE : View.VISIBLE);
                 }
             });
         }
@@ -396,6 +401,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener, T
         // 时间与天气字号（2026-10-25 K，合并自二开版）：0 标准 / 1 大 / 2 特大。
         // 只调左上角时间、日期、天气三处，格子与磁贴尺寸不动——960dp 屏上再大就会把网格挤走。
         applyHeaderScale(Config.headerSize(this));
+        // 首页信息开关 + 时间块位置（K 2026-10-26）：都在桌面设置里改，回桌面 recreate 生效。
+        // 顶栏显隐要先定下来，居中/靠右时整块才能正确避让。
+        View topBarView = findViewById(R.id.topButtons);
+        if (topBarView != null) topBarView.setVisibility(cfg.topBar ? View.VISIBLE : View.GONE);
+        applyHeaderLayout();
         if (shamsi) {
             shamsiDate.setVisibility(View.VISIBLE);
             TextView date = findViewById(R.id.date);
@@ -567,7 +577,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener, T
             onLibraryRequested();
             libraryFromTopBar = true;   // closing it goes back to this button, not to the pill after the last row
         });
-        btnLibraryTop.setVisibility(cfg.libraryButton && cfg.appLibrary ? View.VISIBLE : View.GONE);
+        // 应用库入口只放网格最后一排（K 2026-10-26 要求：别放右上角，放下面方便）。
+        // 顶栏这一枚一律不显示，保留控件只为兼容旧的 focus 逻辑。
+        btnLibraryTop.setVisibility(View.GONE);
         iconOnlyButtons = cfg.iconOnlyButtons;
         wifiIconOnly = iconOnlyButtons && cfg.wifiLabelWidth <= 0;
         if (iconOnlyButtons) {
@@ -2192,6 +2204,155 @@ public class MainActivity extends Activity implements AppAdapter.TileListener, T
             greeting.setTextColor(greetingColor);
         }
         if (shamsi) shamsiDate.setText(Shamsi.today());
+    }
+
+
+    /**
+     * 时间块位置 + 首页信息开关（K 2026-10-26）。
+     *
+     * 整块（问候语 / 时间 / 日期 / 天气）跟着 header_align 一起挪：
+     *   left   老版本，靠左，右上角按钮不动
+     *   center 居中，右上角按钮仍贴右边（所以整块要收窄，否则跟按钮抢位置）
+     *   right  靠右，跟右上角按钮同一条右边线，按钮在下面一行
+     * 问候语默认关（K 的版本一直隐藏），关掉时高度是 0，不占位置。
+     */
+    private void applyHeaderLayout() {
+        if (clockBlock == null) return;
+        String align = Config.headerAlign(this);
+        // 电视端开关优先，没选过用 config.xml / 主题里的默认值（问候语默认关，跟老版本一致）
+        boolean showGreeting = Config.showGreeting(this, cfg.greetingEnabled);
+        boolean showDate = Config.showDate(this, cfg.dateEnabled);
+        boolean showWeather = Config.showWeather(this, cfg.weatherEnabled);
+
+        greeting.setVisibility(showGreeting ? View.VISIBLE : View.GONE);
+        View dateView = clockBlock.findViewById(R.id.date);
+        View shamsiView = clockBlock.findViewById(R.id.shamsiDate);
+        if (dateView != null) dateView.setVisibility(showDate ? View.VISIBLE : View.GONE);
+        // 波斯历那一行只在 shamsi 打开时本来就显示，这里只管日期行的显隐
+        if (shamsiView != null && !shamsi) shamsiView.setVisibility(View.GONE);
+        // 天气：关掉就隐藏；开着但还没取到数据也先隐藏（回调来了再显示）。
+        // weatherHiddenByUser 让异步回调尊重用户的选择，不会自己又亮出来。
+        weatherHiddenByUser = !showWeather;
+        if (weatherText != null) {
+            weatherText.setVisibility(showWeather && weatherText.getText().length() > 0
+                    ? View.VISIBLE : View.GONE);
+        }
+
+        // 整块始终占满一行，靠改每行文字的 gravity 来移动，不跟 RelativeLayout 的宽度约束打架
+        // （试过改 lp.width + CENTER_HORIZONTAL：宽度会被 toStartOf(topButtons) 那条旧规则压回去，
+        //  实测写成 1520 量出来还是 823，文字留在左边）。
+        View topButtons = findViewById(R.id.topButtons);
+        boolean barVisible = topButtons != null && topButtons.getVisibility() == View.VISIBLE;
+        // 每次都新建一份 LayoutParams：XML 里的 layout_toStartOf(topButtons) 会把这行压成
+        // 「按钮左边的剩余宽度」（实测 1696 变成 823），改原实例再 removeRule 不管用，只有换新实例才彻底。
+        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        lp.addRule(RelativeLayout.ALIGN_PARENT_START);
+        if (!"left".equals(align) && barVisible) {
+            // 居中/靠右时把顶栏钉在父容器顶部，时间块排在它下面一行——否则顶栏是「底边对齐时间块」，
+            // 你推时间块下去它也跟着下去，永远挤在同一条线上（实测按钮压在天气那一行上）。
+            RelativeLayout.LayoutParams bp =
+                    (RelativeLayout.LayoutParams) topButtons.getLayoutParams();
+            bp.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+            bp.removeRule(RelativeLayout.ALIGN_BOTTOM);
+            bp.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+            bp.topMargin = 0;
+            topButtons.setLayoutParams(bp);
+            lp.addRule(RelativeLayout.BELOW, R.id.topButtons);
+            lp.topMargin = Math.round(10 * density);
+        } else {
+            lp.topMargin = 0;
+        }
+        clockBlock.setLayoutParams(lp);
+
+        // 时间格式（K 2026-10-26）：24 小时制 / 12 小时制，屏保也读同一份设置。
+        // 12 小时制直接在时钟后面带「上午/下午」，比单独一行宽裕，960dp 屏放得下。
+        View clockView = clockBlock.findViewById(R.id.clock);
+        if (clockView instanceof android.widget.TextClock) {
+            android.widget.TextClock clock = (android.widget.TextClock) clockView;
+            // 24 小时制时给 format12Hour 一个正常值，别留空（留空在部分固件上会整块空白）
+            String fmt = Config.hour12(this) ? "h:mm a" : "HH:mm";
+            clock.setFormat12Hour(fmt);
+            clock.setFormat24Hour(fmt);
+        }
+
+        // 对齐后文字的排版也跟着走：居中时每一行都居中，靠右时右对齐
+        int gravity = "center".equals(align) ? Gravity.CENTER_HORIZONTAL
+                : "right".equals(align) ? Gravity.END : Gravity.START;
+        for (int id : new int[]{R.id.greeting, R.id.clock, R.id.date, R.id.shamsiDate, R.id.weather}) {
+            View v = clockBlock.findViewById(id);
+            if (!(v instanceof TextView)) continue;
+            TextView tv = (TextView) v;
+            tv.setGravity(gravity | Gravity.CENTER_VERTICAL);
+            // 天气/问候语是整行 TextView，靠 gravity 就能居中；日期在容器里，另见下面的处理
+
+            // 日期原来在时间右边那条 0dp+weight 的槽里；居中和靠右时给它一个固定宽度，
+            // 否则它会一直贴着时钟右边，整块看起来仍在左边。
+            if (id == R.id.date) {
+                ViewGroup.LayoutParams dlp = tv.getLayoutParams();
+                if (dlp instanceof LinearLayout.LayoutParams) {
+                    LinearLayout.LayoutParams dp = (LinearLayout.LayoutParams) dlp;
+                    // 左对齐时保持 XML 原样（match_parent / wrap_content）。
+                    // 这里千万不能给 0dp+weight=1：date 的父容器是「竖排」LinearLayout，
+                    // 竖排里 weight 管的是高度，宽度写成 0 会让整行日期变成 0 宽 —— 实测日期直接消失。
+                    // 居中/靠右时才改成 wrap_content，宽度随文字走才能精确居中（固定 320dp 会偏）。
+                    boolean leftAlign = "left".equals(align);
+                    dp.width = leftAlign ? LinearLayout.LayoutParams.MATCH_PARENT
+                            : LinearLayout.LayoutParams.WRAP_CONTENT;
+                    dp.height = LinearLayout.LayoutParams.WRAP_CONTENT;
+                    dp.weight = 0f;
+                    tv.setLayoutParams(dp);
+                }
+                // 日期外面还有一层 0dp+weight=1 的竖排容器（原先用来吃掉时钟右边剩余宽度）。
+                // 不改它，时钟会被这层推到最左边——居中的是容器里的日期，不是整块。
+                if (tv.getParent() instanceof LinearLayout) {
+                    LinearLayout holder = (LinearLayout) tv.getParent();
+                    ViewGroup.LayoutParams hlp = holder.getLayoutParams();
+                    // 居中/靠右时让这层容器铺满宽度，并且自己居中——只给 TextView 设 gravity 没用，
+                    // 文字是贴在这层容器的左上角（实测日期留在 112px，跟居中的时钟对不上）。
+                    holder.setGravity("left".equals(align) ? Gravity.START : Gravity.CENTER_HORIZONTAL);
+                    if (hlp instanceof LinearLayout.LayoutParams) {
+                        LinearLayout.LayoutParams hp2 = (LinearLayout.LayoutParams) hlp;
+                        hp2.weight = "left".equals(align) ? 1f : 0f;
+                        hp2.width = "left".equals(align) ? 0 : LinearLayout.LayoutParams.MATCH_PARENT;
+                        // 竖排时日期块紧贴时钟下方，不要那 16dp 的左缩进
+                        hp2.leftMargin = "left".equals(align) ? Math.round(16 * density) : 0;
+                        holder.setLayoutParams(hp2);
+                    }
+                }
+            }
+        }
+        // 时间行（时钟 + 竖线 + 日期）：左对齐时是「时钟 | 日期」一行；居中/靠右时改成竖排，
+        // 时钟在上、日期在下、天气再下一行，三行各自居中——这才是「时间居中」该有的样子
+        // （只在同一行里居中，时钟仍然会偏在左半边，实测组中心在 960 但视觉上还是左）。
+        if (clockBlock instanceof ViewGroup) {
+            ViewGroup block = (ViewGroup) clockBlock;
+            for (int i = 0; i < block.getChildCount(); i++) {
+                View child = block.getChildAt(i);
+                if (!(child instanceof LinearLayout)) continue;
+                LinearLayout row = (LinearLayout) child;
+                if ("left".equals(align)) {
+                    row.setOrientation(LinearLayout.HORIZONTAL);
+                    row.setGravity(Gravity.CENTER_VERTICAL);
+                } else {
+                    row.setOrientation(LinearLayout.VERTICAL);
+                    row.setGravity(Gravity.CENTER_HORIZONTAL);
+                }
+            }
+        }
+        // 竖排时那根分隔竖线没有意义，藏起来（clockBlock 的直接子节点里既有 LinearLayout 也有 TextView，
+        // 必须先判类型——直接强转 ViewGroup 会 ClassCastException，实测启动即崩）
+        ViewGroup block = (ViewGroup) clockBlock;
+        for (int i = 0; i < block.getChildCount(); i++) {
+            View child = block.getChildAt(i);
+            if (!(child instanceof ViewGroup)) continue;
+            ViewGroup row = (ViewGroup) child;
+            for (int j = 0; j < row.getChildCount(); j++) {
+                View c = row.getChildAt(j);
+                if (c.getClass() == View.class) c.setVisibility("left".equals(align) ? View.VISIBLE : View.GONE);
+            }
+        }
+
     }
 
     // ---- race-weekend panel (a theme's race_calendar) -----------------------------------------------

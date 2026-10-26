@@ -56,12 +56,14 @@ final class WallpaperController {
             "coast", "forest", "waterfall", "alpine",
             "car_coast", "car_desert",
             "cartoon_coast", "cartoon_village",
-            "big-sur-coastline", "big-sur-mountains", "big-sur-road"};
+            "big-sur-coastline", "big-sur-mountains", "big-sur-road",
+            "golden-gate-sunset"};
     private static final String[] ZH = {
             "海岸暮色", "森林晨光", "金色瀑布", "雪山湖泊",
             "海岸跑车", "峡谷跑车",
             "卡通海岸", "童话小镇",
-            "大苏尔海岸", "大苏尔群山", "大苏尔山路"};
+            "大苏尔海岸", "大苏尔群山", "大苏尔山路",
+            "金门大桥日落"};
     /** 壁纸页的分区：标题 + 该区在 FILES 里的起止下标。 */
     private static final String[] GROUPS = {"自然风景", "跑车", "卡通场景", "清简风景"};
     private static final int[] GROUP_FROM = {0, 4, 6, 8};
@@ -78,6 +80,8 @@ final class WallpaperController {
     private final Handler main = new Handler(Looper.getMainLooper());
     private final ExecutorService decoder = Executors.newSingleThreadExecutor();
     private final ImageView current, incoming;
+    /** 壁纸页左下角的一次性提示（下载中/失败），平时隐藏。 */
+    private TextView status;
     private final View shade;
     private final Bitmap[] thumbnails = new Bitmap[FILES.length];
     private volatile int request;
@@ -410,8 +414,11 @@ final class WallpaperController {
         TextView bingBtn = pill(bingMode || bing.enabled() ? "必应每日：开" : "必应每日：关");
         if (hasBing) place(page, bingBtn, 172, 42, 736, 40);
 
-        TextView status = label("按方向键挑选，OK 应用", 13);
+        // K 2026-10-26：左下角不再显示「壁纸名称 / 确定应用」——选中就套用，屏幕留白更干净。
+        // 这个 label 只承载「正在下载 / 下载失败」这类一次性提示，平时是隐藏的。
+        status = label("", 13);
         status.setTextColor(0x99FFFFFF);
+        status.setVisibility(View.GONE);
         place(page, status, 840, 24, 60, 508);
 
         // ---- 缩略图网格（4 列，垂直滚动）----
@@ -477,10 +484,15 @@ final class WallpaperController {
             tile.setOnFocusChangeListener((v, focused) -> {
                 v.setBackground(cardBg(focused));
                 if (!focused) return;
-                int c = tileChoice.get(at);
+                // 把选中项滚进可视区（居中），否则连按方向键时焦点已经走了、画面还停在旧位置，
+                // 看起来就是「选中项跳来跳去对不上」。K 2026-10-26 报的就是这个。
+                scrollTileIntoView(scroll, v);
+                final int c = tileChoice.get(at);
                 preview = c;
-                display(c, true);
-                status.setText(name(c));
+                // 预览去抖：连续滚动时不要每经过一张都换壁纸（每次换都要解码+淡入，看着像画面在抖）
+                main.removeCallbacks(previewRun);
+                previewRun = () -> { if (picker != null) display(c, true); };
+                main.postDelayed(previewRun, 140);
             });
             tile.setOnClickListener(v -> {
                 int c = tileChoice.get(at);
@@ -515,11 +527,7 @@ final class WallpaperController {
             });
         }
 
-        auto.setOnFocusChangeListener((v, focus) -> {
-            auto.setBackground(cardBg(focus));
-            if (focus) status.setText(rotating
-                    ? "按确定关闭轮播，固定当前壁纸" : "按确定开启轮播：每 5 分钟换一张");
-        });
+        auto.setOnFocusChangeListener((v, focus) -> auto.setBackground(cardBg(focus)));
         auto.setOnClickListener(v -> commit(preview < 0 ? index : preview, !rotating, false, false));
         auto.setOnKeyListener((v, key, event) -> {
             if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
@@ -529,23 +537,19 @@ final class WallpaperController {
         });
 
         if (hasBing) {
-            bingBtn.setOnFocusChangeListener((v, focus) -> {
-                bingBtn.setBackground(cardBg(focus));
-                if (focus) status.setText(bingMode || bing.enabled()
-                        ? "按确定关闭必应每日壁纸（当前壁纸保留）" : "按确定开启：每天自动换一张必应今日图");
-            });
+            bingBtn.setOnFocusChangeListener((v, focus) -> bingBtn.setBackground(cardBg(focus)));
             bingBtn.setOnClickListener(v -> {
                 boolean on = !(bingMode || bing.enabled());
                 bing.setEnabled(on);
                 if (on) {
                     // 开启：立即后台拉一张，拉到就切到必应模式
-                    status.setText("正在下载今日必应壁纸…");
+                    hint("正在下载今日必应壁纸…", 0);
                     decoder.execute(() -> {
                         bing.refreshIfDue();
                         main.post(() -> {
                             if (picker == null || activity.isDestroyed()) return;
                             if (bing.file() != null) commit(0, false, false, true);
-                            else status.setText("下载失败（电视可能没联网），明天开机自动重试");
+                            else hint("下载失败（电视可能没联网），明天开机自动重试", 4000);
                         });
                     });
                 } else {
@@ -642,6 +646,39 @@ final class WallpaperController {
         choices.add(choice);
         cells.add(new int[]{row, col});
     }
+
+    /** 预览去抖：连续按键时只解最后一次的壁纸。 */
+    private Runnable previewRun;
+
+    /** 把选中的缩略图滚到可视区中间，焦点和画面就不会各走各的（垂直 ScrollView 版本）。 */
+    private void scrollTileIntoView(ScrollView scroll, View tile) {
+        if (scroll == null || tile == null || scroll.getChildCount() == 0) return;
+        View column = scroll.getChildAt(0);
+        int y = 0;
+        View cur = tile;
+        while (cur != null && cur != column) {
+            y += cur.getTop();
+            android.view.ViewParent p = cur.getParent();
+            if (!(p instanceof View)) break;
+            cur = (View) p;
+        }
+        int max = Math.max(0, column.getHeight() - scroll.getHeight());
+        int target = Math.max(0, Math.min(max, y - (scroll.getHeight() - tile.getHeight()) / 2));
+        scroll.smoothScrollTo(0, target);
+    }
+
+    /** 壁纸页的临时提示：{@code ms<=0} = 一直显示到状态变化，否则到时自动收起。 */
+    private void hint(String text, long ms) {
+        if (status == null) return;
+        status.setText(text);
+        status.setVisibility(View.VISIBLE);
+        status.removeCallbacks(hideHint);
+        if (ms > 0) status.postDelayed(hideHint, ms);
+    }
+
+    private final Runnable hideHint = () -> {
+        if (status != null) status.setVisibility(View.GONE);
+    };
 
     private TextView pill(String value) {
         TextView text = label(value, 14);

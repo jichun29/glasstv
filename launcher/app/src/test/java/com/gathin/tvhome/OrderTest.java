@@ -52,10 +52,11 @@ public class OrderTest {
     }
 
     @Test
-    public void changedDockAppsDropTheSavedOrder() {
+    public void savedOrderSurvivesDockChanges() {
+        // dock_apps 是随构建/主题变的，排序不该因为它变了就整份作废（Order.ranks 的注释就是这么写的）。
         Order o = new Order(Order.dockKey(DOCK), Arrays.asList("b/.B", "a/.A"));
-        assertTrue(Order.ranks(o, Arrays.asList("com.netflix.ninja", "com.plexapp.android")).isEmpty());
-        assertTrue(Order.ranks(o, Collections.singletonList("com.plexapp.android")).isEmpty());
+        assertEquals(Integer.valueOf(0), Order.ranks(o, Arrays.asList("com.netflix.ninja", "com.plexapp.android")).get("b/.B"));
+        assertEquals(Integer.valueOf(1), Order.ranks(o, Collections.singletonList("com.plexapp.android")).get("a/.A"));
         assertTrue(Order.ranks(null, DOCK).isEmpty());
     }
 

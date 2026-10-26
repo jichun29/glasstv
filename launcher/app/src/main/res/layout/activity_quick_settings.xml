@@ -111,39 +111,15 @@
             android:clipChildren="false"
             android:clipToPadding="false" />
 
-        <!-- 底部：守护状态 + 版本号 -->
-        <LinearLayout
+        <!-- 底部只留版本号（K 2026-10-26：控制面板里的「桌面守护」整行撤掉，不显示这个功能） -->
+        <TextView
+            android:id="@+id/ccVersion"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginTop="14dp"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp">
-
-            <View
-                android:id="@+id/ccGuardDot"
-                android:layout_width="7dp"
-                android:layout_height="7dp"
-                android:background="@drawable/cc_guard_dot" />
-
-            <TextView
-                android:id="@+id/ccGuardText"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                android:textColor="#99FFFFFF"
-                android:textSize="12sp"
-                android:fontFamily="@font/outfit_regular" />
-
-            <TextView
-                android:id="@+id/ccVersion"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#66FFFFFF"
-                android:textSize="12sp"
-                android:fontFamily="@font/outfit_regular" />
-        </LinearLayout>
+            android:layout_marginTop="12dp"
+            android:gravity="end"
+            android:textColor="#66FFFFFF"
+            android:textSize="12sp"
+            android:fontFamily="@font/outfit_regular" />
     </LinearLayout>
 </FrameLayout>

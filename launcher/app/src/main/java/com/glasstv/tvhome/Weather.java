@@ -62,6 +62,11 @@ public final class Weather {
         }
     }
 
+    /** 自动定位到的城市名（没取到读数时 null），设置页只读展示用。 */
+    public static String place() {
+        return current != null ? current.place : null;
+    }
+
     public interface Listener {
         void onWeather(Now now); // null = 无有效读数
     }

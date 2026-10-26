@@ -75,6 +75,8 @@ final class FlipScene {
     private SimpleDateFormat dateFormat;
     private boolean started;
     private boolean alive = true;
+    /** 12 小时制时脚注里要带「上午/下午」，跟桌面时钟同一个设置（K 2026-10-26）。 */
+    private boolean hour12;
 
     private final Runnable tick = new Runnable() {
         @Override
@@ -88,6 +90,7 @@ final class FlipScene {
     FlipScene(Context context, View root) {
         content = root.findViewById(R.id.flipContent);
         footnote = root.findViewById(R.id.flipFootnote);
+        hour12 = Config.hour12(context);
 
         // 牌子尺寸照 Fliqlo 官方截图量出来的比例（2026-10-26 重做）：
         //   · 单块略竖：高 = 宽 × 1.12（之前 1.02 太方，两块拼起来像个方盒子）
@@ -165,7 +168,8 @@ final class FlipScene {
 
     private void render() {
         Date now = new Date();
-        String hh = new SimpleDateFormat("HH", Locale.CHINA).format(now);
+        // 时间格式（K 2026-10-26）：桌面设置里选 12 小时制就让翻页牌走 h，脚注里补上午/下午。
+        String hh = new SimpleDateFormat(hour12 ? "h" : "HH", Locale.CHINA).format(now);
         String mm = new SimpleDateFormat("mm", Locale.CHINA).format(now);
 
         boolean animate = started;    // 第一次进来直接摆好，不翻
@@ -203,6 +207,7 @@ final class FlipScene {
                     + " " + WEEK[Math.max(0, Math.min(6, dow))];
         }
         String line = weatherText.isEmpty() ? dateText : weatherText + DOT + dateText;
+        if (hour12) line = new SimpleDateFormat("a", Locale.CHINA).format(new Date()) + "  " + line;
         if (!line.equals(footnote.getText().toString())) footnote.setText(line);
     }
 

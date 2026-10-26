@@ -38,6 +38,20 @@ final class Config {
     static final String WALLPAPER_CHOICE_KEY = "wallpaper_choice";
     /** 时间与天气字号档位（0 标准 / 1 大 / 2 特大），电视端选择，覆盖主题。 */
     static final String HEADER_SIZE_KEY = "header_size";
+    /** 时间/日期/天气整块的位置：left（默认）/ center / right。电视端选择，覆盖主题。 */
+    static final String HEADER_ALIGN_KEY = "header_align";
+    /** 首页问候语是否显示（默认关：K 的版本一直隐藏，这里给用户开关）。 */
+    static final String SHOW_GREETING_KEY = "show_greeting";
+    /** 日期是否显示（默认开）。 */
+    static final String SHOW_DATE_KEY = "show_date";
+    /** 天气是否显示（默认开）。 */
+    static final String SHOW_WEATHER_KEY = "show_weather";
+    /** 每个应用图标下是否常显名称（默认开；关掉只有焦点项显示名字）。 */
+    static final String SHOW_APP_NAMES_KEY = "show_app_names";
+    /** 时间格式：24（默认）/ 12。桌面时钟和屏保时钟共用这一个选择。 */
+    static final String TIME_FORMAT_KEY = "time_format";
+    /** 首页是否只显示常用应用那一排（true 时其余应用收进应用库，中间留白）。 */
+    static final String DOCK_ONLY_KEY = "home_dock_only_v2";
     /** 天气城市（电视端手填，空 = 自动定位），覆盖主题里的 weather_city。 */
     static final String WEATHER_CITY_KEY = "weather_city";
     /** 翻页时钟屏保的卡片大小：0 小 / 1 中 / 2 大（默认大）。 */
@@ -69,6 +83,8 @@ final class Config {
     final boolean shamsiDate;
     /** Name after the greeting ("Good morning, Mr. Trịnh"); empty for the greeting alone. */
     final String greetingName;
+    /** 首页信息默认值（config.xml / 主题可改，电视端开关优先）：问候语 / 日期 / 天气。 */
+    final boolean greetingEnabled, dateEnabled, weatherEnabled;
     final boolean moduleCards;
     /** Calmer motion for weak GPUs (config.xml, reduced_motion): stiff spring, short fades, no replay. */
     final boolean reducedMotion;
@@ -149,7 +165,8 @@ final class Config {
                    int wallpaperRotationMinutes, int wallpaperDim, String wallpaperOrder, boolean overlayApplied,
                    Festival festival, int[] inputKeycodes, List<String> appKeys,
                    List<RaceWeekend.Race> raceCalendar, boolean cinematicHome, boolean ambientGlow, int homeIdleClockMinutes,
-                   boolean topBar, String weatherCity) {
+                   boolean topBar, String weatherCity,
+                   boolean greetingEnabled, boolean dateEnabled, boolean weatherEnabled) {
         this.inputKeycodes = inputKeycodes;
         this.appKeys = Collections.unmodifiableList(appKeys);
         this.dockApps = Collections.unmodifiableList(dockApps);
@@ -169,6 +186,9 @@ final class Config {
         this.advancedEffects = advancedEffects;
         this.shamsiDate = shamsiDate;
         this.greetingName = greetingName;
+        this.greetingEnabled = greetingEnabled;
+        this.dateEnabled = dateEnabled;
+        this.weatherEnabled = weatherEnabled;
         this.moduleCards = moduleCards;
         this.reducedMotion = reducedMotion;
         this.dockTitle = dockTitle;
@@ -225,6 +245,61 @@ final class Config {
     }
 
     /**
+     * 时间块位置：left / center / right。没在电视上选过就是 left（保持老版本行为），
+     * 值不在三种之内也一律回 left，别让脏数据把时间画到屏幕外。
+     */
+    static String headerAlign(Context ctx) {
+        String v = ctx.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE)
+                .getString(HEADER_ALIGN_KEY, "left");
+        return "center".equals(v) || "right".equals(v) ? v : "left";
+    }
+
+    /**
+     * 首页问候语是否显示：电视端选择优先，没选过就用主题/配置里的默认值。
+     * 默认值来自 config.xml 的 greeting_enabled（老版本一律隐藏，所以缺省 false，升级后界面不变）。
+     */
+    static boolean showGreeting(Context ctx, boolean themed) {
+        return ctx.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE)
+                .getBoolean(SHOW_GREETING_KEY, themed);
+    }
+
+    /** 12 小时制：桌面和屏保都读它，默认 false = 24 小时制。 */
+    static boolean hour12(Context ctx) {
+        return "12".equals(ctx.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE)
+                .getString(TIME_FORMAT_KEY, "24"));
+    }
+
+    /**
+     * 首页只显示常用应用那一排（K 2026-10-26 改默认关）：K 实测发现只有关掉它、下面几排才出来，
+     * 所以默认沿用原来的「全部铺开」，想要留白再到设置里自己开。
+     */
+    static boolean dockOnly(Context ctx) {
+        return ctx.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE)
+                .getBoolean(DOCK_ONLY_KEY, false);
+    }
+
+    /** 日期行是否显示：电视端选择优先，没选过就用主题/配置里的 greeting/date 默认值。 */
+    static boolean showDate(Context ctx, boolean themed) {
+        return ctx.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE)
+                .getBoolean(SHOW_DATE_KEY, themed);
+    }
+
+    /** 天气是否显示：电视端选择优先，没选过就用主题/配置里的值。 */
+    static boolean showWeather(Context ctx, boolean themed) {
+        return ctx.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE)
+                .getBoolean(SHOW_WEATHER_KEY, themed);
+    }
+
+    /**
+     * 图标下常显名称：电视端没选过就用主题值（总是常显，兼容老版本），选过就听电视端。
+     * 这里只在「关掉」时返回 false，让 AppAdapter 只显示焦点项的名字。
+     */
+    static boolean showAppNames(Context ctx, boolean themed) {
+        return ctx.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE)
+                .getBoolean(SHOW_APP_NAMES_KEY, themed);
+    }
+
+    /**
      * 翻页时钟屏保的卡片大小：0 小 / 1 中 / 2 大，默认 1（中）。
      * 默认取「中」：4.0.4 里 34% 那版 K 反馈偏大，中档（单块 25% 屏宽）才是合适的第一印象。
      * 范围外的值一律回「中」。
@@ -259,6 +334,9 @@ final class Config {
         boolean advancedEffects = res.getBoolean(R.bool.advanced_effects);
         boolean shamsi = res.getBoolean(R.bool.shamsi_date);
         String greetingName = res.getString(R.string.greeting_name).trim();
+        boolean greetingEnabled = res.getBoolean(R.bool.greeting_enabled);
+        boolean dateEnabled = res.getBoolean(R.bool.date_enabled);
+        boolean weatherEnabled = res.getBoolean(R.bool.weather_enabled);
         boolean moduleCards = res.getBoolean(R.bool.module_cards);
         boolean reducedMotion = res.getBoolean(R.bool.reduced_motion);
         boolean dockTitle = res.getBoolean(R.bool.dock_title);
@@ -310,6 +388,9 @@ final class Config {
             advancedEffects = bool(json, "advanced_effects", advancedEffects);
             shamsi = bool(json, "shamsi_date", shamsi);
             greetingName = string(json, "greeting_name", greetingName).trim();
+            greetingEnabled = bool(json, "greeting_enabled", greetingEnabled);
+            dateEnabled = bool(json, "date_enabled", dateEnabled);
+            weatherEnabled = bool(json, "weather_enabled", weatherEnabled);
             moduleCards = bool(json, "module_cards", moduleCards);
             reducedMotion = bool(json, "reduced_motion", reducedMotion);
             dockTitle = bool(json, "dock_title", dockTitle);
@@ -354,6 +435,10 @@ final class Config {
         advancedEffects = choices.getBoolean("advanced_effects", advancedEffects);
         // 减弱动画：遥控器上可切换（tvhome-zh v1.4.1 移植），电视端选择覆盖 config.xml / 主题
         reducedMotion = choices.getBoolean("reduced_motion", reducedMotion);
+        // 图标下常显名称（K 2026-10-26）：电视端改过就听电视端的，没改过沿用主题
+        if (choices.contains(SHOW_APP_NAMES_KEY)) {
+            alwaysShowNames = choices.getBoolean(SHOW_APP_NAMES_KEY, alwaysShowNames);
+        }
         File wallpaper = dir != null ? new File(dir, WALLPAPER_NAME) : null;
         if (wallpaper != null && !(wallpaper.isFile() && wallpaper.length() > 0)) wallpaper = null;
         // A theme can also switch the wallpaper off while the file is still there.
@@ -401,7 +486,8 @@ final class Config {
                 Math.max(0, Math.min(100, skyIntensity)), settingsKeycodes, settingsKeyPanel, wallpaperEnabled, wallpaper,
                 wallpapers, rotationMinutes, wallpaperDim, wallpaperOrder, applied,
                 festival, inputKeycodes, appKeys, json == null ? Collections.emptyList() : raceCalendar(json), cinematic, ambientGlow,
-                Math.max(0, idleClockMinutes), topBar, weatherCity);
+                Math.max(0, idleClockMinutes), topBar, weatherCity,
+                greetingEnabled, dateEnabled, weatherEnabled);
     }
 
     /**

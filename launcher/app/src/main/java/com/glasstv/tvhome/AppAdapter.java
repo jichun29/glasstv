@@ -189,6 +189,8 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final boolean animations;
     private final boolean advancedEffects;
     private final boolean showLibrary;
+    /** 首页只显示常用应用那一排（K 2026-10-26）：其余应用收进应用库，中间留白。 */
+    private final boolean dockOnly;
     /** Packages with a leanback entry at the last reload(): their tiles launch with the leanback category. */
     private Set<String> leanbackPackages = new HashSet<>();
     private final boolean showHomeSettings;
@@ -210,7 +212,9 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.animations = cfg.animations;
         this.advancedEffects = cfg.animations && cfg.advancedEffects;
         this.showHomeSettings = cfg.showHomeSettingsShortcut;
-        this.showLibrary = cfg.appLibrary;
+        // 应用库入口固定在网格最后一排（K 2026-10-26：放下面比放右上角顺手，顶栏那枚已撤）。
+        this.dockOnly = Config.dockOnly(ctx);
+        this.showLibrary = true;
         this.reducedMotion = cfg.reducedMotion;
         this.rowsBelowDock = cfg.rowsBelowDock;
         this.dockTitle = cfg.dockTitle;
@@ -320,6 +324,18 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         for (int i = 0; i < emptySlots; i++) {
             fresh.add(docked + i, new Entry(Entry.EMPTY, "", new ComponentName(ctx, "empty-dock-slot-" + i),
                     null, null, null, 0));
+        }
+        // 只显示一排（K 2026-10-26）：首页只留「第一排」= 每行列数那么多，其余全部从应用库进。
+        // 注意不能按 docked 切：K 的 dock_apps 数组有十几个包（既是 Dock 又是网格排序表），
+        // docked 会把两三排都算成"常用应用"，屏幕上依旧铺两排 —— 真机实测就是这样。
+        // 保留空槽位 / U 盘 / 默认桌面这几类磁贴，它们不是多余应用。
+        if (dockOnly && dockSize > 0 && fresh.size() > dockSize) {
+            List<Entry> kept = new ArrayList<>(fresh.subList(0, dockSize));
+            for (int i = dockSize; i < fresh.size(); i++) {
+                Entry e = fresh.get(i);
+                if (e.kind == Entry.EMPTY || e.kind == Entry.USB || e.kind == Entry.HOME_SETTINGS) kept.add(e);
+            }
+            fresh = kept;
         }
         items.clear();
         items.addAll(fresh);

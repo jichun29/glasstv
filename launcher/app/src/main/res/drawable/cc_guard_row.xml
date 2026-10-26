@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 控制中心底部「桌面守护」整行的底：平时透明，聚焦时淡白填充 + 白描边，
+     让人看得出这行是可以按确定进去的（2026-10-26 K：守护要能在电视上自己开）。 -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#26FFFFFF" />
+            <corners android:radius="10dp" />
+            <stroke android:width="1.5dp" android:color="#B3FFFFFF" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#00000000" />
+            <corners android:radius="10dp" />
+            <stroke android:width="1dp" android:color="#1FFFFFFF" />
+        </shape>
+    </item>
+</selector>

@@ -2,12 +2,15 @@ package com.glasstv.tvhome;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.GradientDrawable;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.io.File;
 import java.util.Random;
@@ -44,6 +47,28 @@ final class ClockScene {
         }
     };
 
+    /**
+     * 屏保时钟的时间格式（K 2026-10-26）：桌面设置里选 24 / 12 小时制，屏保跟着走。
+     * 12 小时制时钟用 h:mm，旁边那个原本空的 TextClock 改成显示「上午/下午」。
+     */
+    private void applyTimeFormat(Context ctx) {
+        boolean hour12 = Config.hour12(ctx);
+        View clock = content.getRootView().findViewById(R.id.dreamClock);
+        if (clock instanceof android.widget.TextClock) {
+            ((android.widget.TextClock) clock).setFormat12Hour(hour12 ? "h:mm" : "HH:mm");
+            ((android.widget.TextClock) clock).setFormat24Hour(hour12 ? "h:mm" : "HH:mm");
+        }
+        View ampmView = content.getRootView().findViewById(R.id.dreamAmPm);
+        android.widget.TextClock ampm = ampmView instanceof android.widget.TextClock
+                ? (android.widget.TextClock) ampmView : null;
+        if (ampm != null) {
+            // 中文环境下 "a" 输出「上午/下午」，英文环境下是 AM/PM，跟着系统语言走
+            ampm.setFormat12Hour(hour12 ? "a" : "");
+            ampm.setFormat24Hour("");
+            ampm.setVisibility(hour12 ? View.VISIBLE : View.GONE);
+        }
+    }
+
     /** root is the inflated dream_clock layout. */
     ClockScene(View root) {
         content = root.findViewById(R.id.dreamContent);
@@ -55,6 +80,7 @@ final class ClockScene {
                 glow.setGradientRadius((r - l) * 0.55f));
         colorIndex = random.nextInt(PALETTE.length);
         setGlow(PALETTE[colorIndex]);
+        applyTimeFormat(root.getContext());
     }
 
     void start() {

@@ -124,6 +124,11 @@
 
     <!-- A name after the greeting: "Mr. Trịnh" shows GOOD MORNING, MR. TRỊNH. Empty: the greeting alone. -->
     <string name="greeting_name" translatable="false"></string>
+    <!-- 首页信息默认显隐（K 2026-10-26）：电视端「桌面设置 → 首页信息」里有开关，那里的选择优先。
+         问候语默认关，跟 v4.0.4 的界面一致；日期/天气默认开。 -->
+    <bool name="greeting_enabled">false</bool>
+    <bool name="date_enabled">true</bool>
+    <bool name="weather_enabled">true</bool>
     <!-- Optional VPN app the network pill opens (hold the pill for Wi-Fi settings), e.g. the package of the
          VPN you use. Empty: the pill opens Wi-Fi settings. The green VPN badge shows for any VPN either way;
          with an app set here, a red "VPN off" badge also shows while no VPN is up. -->

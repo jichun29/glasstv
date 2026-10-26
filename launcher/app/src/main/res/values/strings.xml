@@ -147,6 +147,8 @@
     <string name="personalize_title">壁纸与屏保</string>
     <string name="cc_guard_on">桌面守护已开启</string>
     <string name="cc_guard_off">桌面守护未开启</string>
+    <string name="cc_guard_hint">在无障碍里找到「桌面守护」，打开开关</string>
+    <string name="cc_guard_badge">去开启</string>
     <string name="cc_wallpaper_hint">壁纸与屏保在「桌面设置」里</string>
     <string name="action_hint">返回键关闭 · 上下选择 · 确定执行</string>
     <string name="action_moved_top">已置顶：%1$s</string>

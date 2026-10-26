@@ -72,7 +72,7 @@
 
 - **信号源**：HDMI 1~3、AV 等输入端口，选中的端口上接了 CEC 设备（Apple TV、音箱）会直接显示设备名。
 - **网络**：显示当前 WiFi 名（有线时显示「有线」），点一下进网络设置。
-- **控制中心**：滑出毛玻璃面板，六个入口——系统设置 / 桌面设置 / 内存清理 / 壁纸与屏保 / 检查更新 / 关于。顶部显示时间日期与网络名，底部显示桌面守护状态和版本号。
+- **控制中心**：滑出毛玻璃面板，六个入口——系统设置 / 桌面设置 / 内存清理 / 壁纸与屏保 / 检查更新 / 关于。顶部显示时间日期与网络名，底部显示版本号。
 
 ### 壁纸与屏保
 
@@ -99,15 +99,11 @@
 
 按间隔清理后台进程，可设白名单保住要常驻的应用，也能随时手动清一次。
 
-### 快传
-
-桌面开一个局域网网页，手机扫码把 APK 直接推进电视，不用 U 盘。
-
 ### 桌面守护
 
 小米等国行固件待机时会强杀第三方桌面，醒来露出自带广告桌面。桌面守护（无障碍服务）盯着窗口切换：原生桌面一冒头就把 GlassTV 拉回来。只盯窗口、不读内容、不拦按键。
 
-装上后需 adb 开一次（一次性）：
+开启方式：装好后用 adb 一次性打开：
 
 ```bash
 adb shell settings put secure enabled_accessibility_services com.glasstv.tvhome/com.glasstv.tvhome.HomeGuardService
@@ -175,7 +171,7 @@ adb shell cmd package set-home-activity --user 0 com.glasstv.tvhome/.MainActivit
 
 ### 第三步（可选）：开桌面守护
 
-小米用户强烈建议开——不然待机后可能回到 PatchWall：
+小米用户强烈建议开——不然待机后可能回到 PatchWall。用 adb 一次性打开：
 
 ```bash
 adb shell settings put secure enabled_accessibility_services com.glasstv.tvhome/com.glasstv.tvhome.HomeGuardService
@@ -248,7 +244,7 @@ cd launcher
 
 产物：`launcher/app/build/outputs/apk/release/app-release.apk`。
 
-> 必须联网构建：快传二维码依赖 `com.google.zxing:core`，本地无缓存时 `--offline` 会直接失败。
+> 首次构建需联网拉依赖；之后 `--offline` 也能增量编译。
 
 ## 致谢
 

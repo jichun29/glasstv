@@ -168,8 +168,15 @@ public final class PersonalizeActivity extends Activity {
                     return true;
                 }
                 if (key == KeyEvent.KEYCODE_DPAD_DOWN) {
-                    if (wallpaperPage) rotatePill.requestFocus();
-                    else idlePill.requestFocus();
+                    // K 2026-10-26：按一下下键要直接落在「默认」那张壁纸上，
+                    // 不能先停在轮播/必应两个开关上（那两个已经挪到底部右侧）。
+                    // 「默认」卡固定是网格第 0 格：下键一律先到它，再到当前选中的那张
+                    if (wallpaperPage) {
+                        if (!tiles.isEmpty()) {
+                            tiles.get(0).requestFocus();
+                            scroll.post(() -> scroll.smoothScrollTo(0, 0));
+                        }
+                    } else saverClock.requestFocus();
                     return true;
                 }
                 return key == KeyEvent.KEYCODE_DPAD_UP;
@@ -189,8 +196,11 @@ public final class PersonalizeActivity extends Activity {
         tabSaverLine.setVisibility(showWallpaper ? View.INVISIBLE : View.VISIBLE);
 
         if (showWallpaper) {
-            status.setText("方向键选壁纸，确定应用");
-            if (focusContent) focusFirstGridTile();
+            // 进「壁纸」页焦点直接落在「默认」那张（网格第 0 格），跟下键的落点一致
+            if (focusContent && !tiles.isEmpty()) {
+                tiles.get(0).requestFocus();
+                scroll.post(() -> scroll.smoothScrollTo(0, 0));
+            }
         } else {
             saverStatus.setText("方向键挑选屏保样式，确定生效");
             if (focusContent) saverClock.requestFocus();
@@ -317,13 +327,8 @@ public final class PersonalizeActivity extends Activity {
             });
         }
 
-        card.setOnFocusChangeListener((v, focused) -> {
-            paintCards();
-            if (!focused) return;
-            status.setText(choice < 0
-                    ? "默认壁纸：纯黑背景 + 应用主题色光晕　确定应用"
-                    : WallpaperController.nameOf(choice) + "　确定应用");
-        });
+        // K 2026-10-26：左下角不再显示壁纸名和「确定应用」——选中直接 OK 生效
+        card.setOnFocusChangeListener((v, focused) -> paintCards());
         card.setOnClickListener(v -> applyWallpaper(choice));
         card.setOnKeyListener((v, key, event) -> {
             if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
@@ -352,10 +357,30 @@ public final class PersonalizeActivity extends Activity {
             return true;
         }
         if (key == KeyEvent.KEYCODE_DPAD_DOWN) {
-            focusRow(cell[0] + 1, cell[1]);   // 没有下一行就留在原地
+            if (!focusRow(cell[0] + 1, cell[1])) {
+                // 已经是最后一行：往下走到底部的轮播 / 必应开关
+                if (rotatePill.getVisibility() == View.VISIBLE) rotatePill.requestFocus();
+            }
             return true;
         }
         return false;
+    }
+
+    /** 目标卡片在滚动列里的纵向偏移（连续加到滚动列的直接子节点为止），并按视口居中。 */
+    private int offsetInColumn(View target) {
+        if (column == null) return 0;
+        int y = 0;
+        View cur = target;
+        while (cur != null && cur != column) {
+            y += cur.getTop();
+            android.view.ViewParent parent = cur.getParent();
+            if (!(parent instanceof View)) break;
+            cur = (View) parent;
+        }
+        int viewport = scroll.getHeight();
+        int centred = y - (viewport - target.getHeight()) / 2;
+        int max = Math.max(0, column.getHeight() - viewport);
+        return Math.max(0, Math.min(max, centred));
     }
 
     /** 跳到指定视觉行里、列最接近 fromCol 的格子；没有该行返回 false。 */
@@ -370,8 +395,10 @@ public final class PersonalizeActivity extends Activity {
         if (best < 0) return false;
         final View target = tiles.get(best);
         target.requestFocus();
-        scroll.post(() -> scroll.smoothScrollTo(0,
-                Math.max(0, target.getTop() - Math.round(dp(16)))));
+        // 关键：卡片是加在「每一行的 LinearLayout」里的，target.getTop() 是相对那一行的 0，
+        // 不是相对滚动列。直接拿它算滚动量永远算出 ~0 —— 这就是「上下滚选中项对不上」的根因。
+        // 必须沿着父链把每层的 top 累加，累到滚动列为止。
+        scroll.post(() -> scroll.smoothScrollTo(0, offsetInColumn(target)));
         return true;
     }
 
@@ -440,8 +467,9 @@ public final class PersonalizeActivity extends Activity {
         });
         rotatePill.setOnKeyListener((v, key, event) -> {
             if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
-            if (key == KeyEvent.KEYCODE_DPAD_DOWN) { focusFirstGridTile(); return true; }
-            if (key == KeyEvent.KEYCODE_DPAD_UP) { tabWallpaper.requestFocus(); return true; }
+            // 这两个开关在最底下一行：上 = 回网格最后一行，下 = 吃掉（不穿到底部空白）
+            if (key == KeyEvent.KEYCODE_DPAD_UP) { focusLastGridRow(); return true; }
+            if (key == KeyEvent.KEYCODE_DPAD_DOWN) return true;
             if (key == KeyEvent.KEYCODE_DPAD_RIGHT && bingPill.getVisibility() == View.VISIBLE) {
                 bingPill.requestFocus();
                 return true;
@@ -457,15 +485,29 @@ public final class PersonalizeActivity extends Activity {
         });
         bingPill.setOnKeyListener((v, key, event) -> {
             if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
-            if (key == KeyEvent.KEYCODE_DPAD_DOWN) { focusFirstGridTile(); return true; }
-            if (key == KeyEvent.KEYCODE_DPAD_UP) { tabWallpaper.requestFocus(); return true; }
+            if (key == KeyEvent.KEYCODE_DPAD_UP) { focusLastGridRow(); return true; }
             if (key == KeyEvent.KEYCODE_DPAD_LEFT) { rotatePill.requestFocus(); return true; }
-            return key == KeyEvent.KEYCODE_DPAD_RIGHT;
+            if (key == KeyEvent.KEYCODE_DPAD_CENTER || key == KeyEvent.KEYCODE_ENTER
+                    || key == KeyEvent.KEYCODE_NUMPAD_ENTER) return false;   // 放行给 click
+            return true;
         });
 
         if (BuildConfig.LITE) bingPill.setVisibility(View.GONE);
         status.setText("方向键选壁纸，确定应用");
         saverStatus.setText("方向键挑选屏保样式，确定生效");
+    }
+
+    /** 焦点回到网格的最后一行（底部开关按上键时用），并把它滚进可视区。 */
+    private void focusLastGridRow() {
+        if (tiles.isEmpty()) return;
+        int lastRow = cells.get(cells.size() - 1)[0];
+        int best = cells.size() - 1;
+        for (int i = 0; i < cells.size(); i++) {
+            if (cells.get(i)[0] == lastRow) { best = i; break; }
+        }
+        final View target = tiles.get(best);
+        target.requestFocus();
+        scroll.post(() -> scroll.smoothScrollTo(0, offsetInColumn(target)));
     }
 
     private void focusFirstGridTile() {
@@ -532,9 +574,12 @@ public final class PersonalizeActivity extends Activity {
         });
         idlePill.setOnKeyListener((v, key, event) -> {
             if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
-            if (key == KeyEvent.KEYCODE_DPAD_DOWN) { saverClock.requestFocus(); return true; }
-            if (key == KeyEvent.KEYCODE_DPAD_UP) { tabSaver.requestFocus(); return true; }
-            return key == KeyEvent.KEYCODE_DPAD_LEFT || key == KeyEvent.KEYCODE_DPAD_RIGHT;
+            // 底部一行：预览屏保 ← 屏保开关（最右）。上回到最右边那张卡。
+            if (key == KeyEvent.KEYCODE_DPAD_UP) { saverBing.requestFocus(); return true; }
+            if (key == KeyEvent.KEYCODE_DPAD_LEFT) { previewButton.requestFocus(); return true; }
+            if (key == KeyEvent.KEYCODE_DPAD_CENTER || key == KeyEvent.KEYCODE_ENTER
+                    || key == KeyEvent.KEYCODE_NUMPAD_ENTER) return false;   // 放行给 click
+            return true;   // 右边界 / 下边界：吃掉
         });
 
         saverClock.setOnFocusChangeListener((v, f) -> {
@@ -648,6 +693,11 @@ public final class PersonalizeActivity extends Activity {
         return false;
     }
 
+    /**
+     * 屏保页最底一行的左右路由（K 2026-10-26 改版后）：
+     * [卡片大小/换图间隔 分段] → [立即换一张] → [预览屏保] → [屏保开关]
+     * first=true 表示按键来自「预览屏保」。
+     */
     private boolean bottomKeys(int key, KeyEvent event, boolean first) {
         if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
         if (key == KeyEvent.KEYCODE_DPAD_UP) {
@@ -656,17 +706,27 @@ public final class PersonalizeActivity extends Activity {
             else saverBing.requestFocus();
             return true;
         }
-        if (key == KeyEvent.KEYCODE_DPAD_DOWN) return true;
+        if (key == KeyEvent.KEYCODE_DPAD_DOWN) return true;   // 已经在最底：吃掉
         if (key == KeyEvent.KEYCODE_DPAD_LEFT) {
-            if (!first && nextImage.getVisibility() == View.VISIBLE) previewButton.requestFocus();
-            else if (segments[0].getVisibility() == View.VISIBLE) segments[segments.length - 1].requestFocus();
-            else if (flipSizeSegments[0].getVisibility() == View.VISIBLE) {
-                flipSizeSegments[flipSizeSegments.length - 1].requestFocus();
-            } else saverClock.requestFocus();
+            if (first) {
+                // 从「预览屏保」往左：先回「立即换一张」（必应屏保时才有），否则回分段，再否则回卡片
+                if (nextImage.getVisibility() == View.VISIBLE) nextImage.requestFocus();
+                else if (segments[0].getVisibility() == View.VISIBLE) segments[segments.length - 1].requestFocus();
+                else if (flipSizeSegments[0].getVisibility() == View.VISIBLE) {
+                    flipSizeSegments[flipSizeSegments.length - 1].requestFocus();
+                } else saverClock.requestFocus();
+            } else {
+                // 从「立即换一张」往左：回分段行
+                if (segments[0].getVisibility() == View.VISIBLE) segments[segments.length - 1].requestFocus();
+                else if (flipSizeSegments[0].getVisibility() == View.VISIBLE) {
+                    flipSizeSegments[flipSizeSegments.length - 1].requestFocus();
+                } else saverClock.requestFocus();
+            }
             return true;
         }
         if (key == KeyEvent.KEYCODE_DPAD_RIGHT) {
-            if (first && nextImage.getVisibility() == View.VISIBLE) nextImage.requestFocus();
+            if (first) idlePill.requestFocus();                 // 预览 → 屏保开关
+            else if (previewButton.getVisibility() == View.VISIBLE) previewButton.requestFocus();
             return true;
         }
         return false;

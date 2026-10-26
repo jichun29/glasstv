@@ -76,8 +76,122 @@
             android:layout_marginTop="32dp"
             android:text="时间与天气" />
 
+        <!-- 首页信息开关（K 2026-10-26）：问候语 / 日期 / 天气 各自可关，不占位置 -->
         <LinearLayout style="@style/SettingsRowV2"
             android:layout_marginTop="12dp"
+            android:focusable="false"
+            android:clickable="false">
+            <TextView style="@style/SettingsRowLabel"
+                android:text="首页显示" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView android:id="@+id/showGreeting"
+                    style="@style/SettingsSegment"
+                    android:layout_width="wrap_content"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="问候语" />
+                <TextView android:id="@+id/showDate"
+                    style="@style/SettingsSegment"
+                    android:layout_width="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="日期" />
+                <TextView android:id="@+id/showWeather"
+                    style="@style/SettingsSegment"
+                    android:layout_width="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="天气" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 时间格式（K 2026-10-26）：桌面时钟和屏保时钟共用这一个选择 -->
+        <LinearLayout style="@style/SettingsRowV2"
+            android:layout_marginTop="10dp"
+            android:focusable="false"
+            android:clickable="false">
+            <TextView style="@style/SettingsRowLabel"
+                android:text="时间格式" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView android:id="@+id/timeFormat24"
+                    style="@style/SettingsSegment"
+                    android:layout_width="wrap_content"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="24 小时" />
+                <TextView android:id="@+id/timeFormat12"
+                    style="@style/SettingsSegment"
+                    android:layout_width="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="12 小时" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 首页只显示一排（K 2026-10-26）：其余应用进应用库，桌面中间留白 -->
+        <LinearLayout style="@style/SettingsRowV2"
+            android:id="@+id/dockOnlyChoice"
+            android:layout_marginTop="10dp">
+            <TextView style="@style/SettingsRowLabel"
+                android:text="首页只显示常用应用" />
+            <TextView android:id="@+id/dockOnlyValue" style="@style/SettingsRowValue"
+                android:text="@string/off" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/SettingsRowV2"
+            android:id="@+id/showAppNamesChoice"
+            android:layout_marginTop="10dp">
+            <TextView style="@style/SettingsRowLabel"
+                android:text="图标下常显名称" />
+            <TextView android:id="@+id/showAppNamesValue" style="@style/SettingsRowValue"
+                android:text="@string/on" />
+        </LinearLayout>
+
+        <!-- 时间位置（K 2026-10-26）：左 / 中 / 右，整块（问候语+时间+日期+天气）一起挪 -->
+        <LinearLayout style="@style/SettingsRowV2"
+            android:layout_marginTop="12dp"
+            android:focusable="false"
+            android:clickable="false">
+            <TextView style="@style/SettingsRowLabel"
+                android:text="时间位置" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView android:id="@+id/headerAlignLeft"
+                    style="@style/SettingsSegment"
+                    android:layout_width="wrap_content"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="左" />
+                <TextView android:id="@+id/headerAlignCenter"
+                    style="@style/SettingsSegment"
+                    android:layout_width="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="中" />
+                <TextView android:id="@+id/headerAlignRight"
+                    style="@style/SettingsSegment"
+                    android:layout_width="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="右" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout style="@style/SettingsRowV2"
+            android:layout_marginTop="10dp"
             android:focusable="false"
             android:clickable="false">
             <TextView style="@style/SettingsRowLabel"
@@ -109,22 +223,14 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- 天气城市：点开弹输入框，空 = 自动定位 -->
+        <!-- 天气城市（K 2026-10-26）：只显示自动定位结果，不再让用户手打城市名 -->
         <LinearLayout style="@style/SettingsRowV2"
-            android:id="@+id/weatherCityChoice"
             android:layout_marginTop="10dp">
             <TextView style="@style/SettingsRowLabel"
                 android:text="天气城市" />
             <TextView android:id="@+id/weatherCityValue"
                 style="@style/SettingsRowValue"
                 android:text="自动定位" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:text="›"
-                android:textColor="#66FFFFFF"
-                android:textSize="24sp" />
         </LinearLayout>
 
         <!-- 背景颜色：壁纸关掉/缺图时才看得见，四色与主题默认一致 -->
@@ -270,39 +376,8 @@
                 android:textSize="24sp" />
         </LinearLayout>
 
-        <!-- ========== 组 5：存储与清理（内存清理独立页 + 快传） ========== -->
-        <TextView
-            style="@style/SettingsGroupTitle"
-            android:layout_marginTop="32dp"
-            android:text="存储与清理" />
-
-        <LinearLayout style="@style/SettingsRowV2"
-            android:id="@+id/memoryEntry"
-            android:layout_marginTop="12dp">
-            <TextView style="@style/SettingsRowLabel"
-                android:text="内存清理" />
-            <TextView android:id="@+id/memoryEntryValue" style="@style/SettingsRowValue"
-                android:text="@string/off" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="›"
-                android:textColor="#66FFFFFF"
-                android:textSize="24sp" />
-        </LinearLayout>
-
-        <LinearLayout style="@style/SettingsRowV2"
-            android:id="@+id/quickTransferChoice"
-            android:layout_marginTop="10dp">
-            <TextView style="@style/SettingsRowLabel"
-                android:text="快传（手机推 APK 到电视）" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="›"
-                android:textColor="#66FFFFFF"
-                android:textSize="24sp" />
-        </LinearLayout>
+        <!-- 组 5「存储与清理」整组已按 K 要求撤掉（2026-10-26）：
+             内存清理在控制中心已有独立入口，快传功能不需要。 -->
 
         <!-- ========== 组 6：系统 ========== -->
         <TextView

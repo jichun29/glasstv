@@ -115,12 +115,7 @@
             android:label="@string/menu_check_update"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:exported="false" />
-        <!-- 快传（2026-10-23 K）：手机浏览器推 APK 到电视装 -->
-        <activity
-            android:name=".QuickTransferActivity"
-            android:label="快传"
-            android:theme="@android:style/Theme.Black.NoTitleBar"
-            android:exported="false" />
+        <!-- 快传已整体移除（K 2026-10-26：这个功能不需要） -->
         <!-- 屏保 / 壁纸 / 内存清理：从桌面设置里拆出来的三个独立页（2026-10-23 K） -->
         <!-- 壁纸 + 屏保合并页（2026-10-25 K）：控制中心从 9 个入口收到 6 个 -->
         <activity

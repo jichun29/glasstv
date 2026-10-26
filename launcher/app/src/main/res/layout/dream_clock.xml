@@ -39,6 +39,7 @@
         android:orientation="vertical">
 
         <TextClock
+            android:id="@+id/dreamClock"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:format12Hour="HH:mm"
@@ -61,8 +62,10 @@
             android:layout_marginTop="8dp">
 
             <TextClock
+                android:id="@+id/dreamAmPm"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
                 android:format12Hour=""
                 android:format24Hour=""
                 android:textColor="#99FFFFFF"

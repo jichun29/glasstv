@@ -107,7 +107,7 @@
 
         <TextView
             android:id="@+id/pzWallpaperMode"
-            android:layout_width="540dp"
+            android:layout_width="864dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="48dp"
             android:layout_marginTop="120dp"
@@ -122,8 +122,8 @@
             android:id="@+id/pzRotate"
             android:layout_width="164dp"
             android:layout_height="40dp"
-            android:layout_marginStart="612dp"
-            android:layout_marginTop="112dp"
+            android:layout_marginStart="572dp"
+            android:layout_marginTop="492dp"
             android:gravity="center"
             android:focusable="true"
             android:clickable="true"
@@ -137,8 +137,8 @@
             android:id="@+id/pzBingDaily"
             android:layout_width="164dp"
             android:layout_height="40dp"
-            android:layout_marginStart="788dp"
-            android:layout_marginTop="112dp"
+            android:layout_marginStart="748dp"
+            android:layout_marginTop="492dp"
             android:gravity="center"
             android:focusable="true"
             android:clickable="true"
@@ -152,7 +152,7 @@
         <ScrollView
             android:id="@+id/pzWallpaperScroll"
             android:layout_width="864dp"
-            android:layout_height="336dp"
+            android:layout_height="320dp"
             android:layout_marginStart="48dp"
             android:layout_marginTop="164dp"
             android:scrollbars="none"
@@ -167,6 +167,7 @@
 
         <TextView
             android:id="@+id/pzStatus"
+            android:visibility="gone"
             android:layout_width="700dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="48dp"
@@ -200,9 +201,9 @@
         <TextView
             android:id="@+id/pzIdleSwitch"
             android:layout_width="152dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="760dp"
-            android:layout_marginTop="112dp"
+            android:layout_height="42dp"
+            android:layout_marginStart="736dp"
+            android:layout_marginTop="418dp"
             android:gravity="center"
             android:focusable="true"
             android:clickable="true"
@@ -482,9 +483,9 @@
 
         <TextView
             android:id="@+id/pzPreviewSaver"
-            android:layout_width="176dp"
+            android:layout_width="152dp"
             android:layout_height="42dp"
-            android:layout_marginStart="600dp"
+            android:layout_marginStart="560dp"
             android:layout_marginTop="418dp"
             android:gravity="center"
             android:focusable="true"
@@ -497,17 +498,18 @@
 
         <TextView
             android:id="@+id/pzSaverHint"
-            android:layout_width="148dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="792dp"
-            android:layout_marginTop="424dp"
-            android:lineSpacingExtra="3dp"
-            android:text="任意键\n退出预览"
+            android:layout_marginStart="560dp"
+            android:layout_marginTop="468dp"
+            android:text="任意键退出预览"
             android:textColor="#4DFFFFFF"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/pzSaverStatus"
+            android:visibility="gone"
             android:layout_width="800dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="48dp"

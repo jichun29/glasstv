@@ -66,11 +66,12 @@ public final class QuickSettingsActivity extends Activity {
         grid.add(new ArrayList<>());
         grid.add(new ArrayList<>());
 
-        addTile(0, row1, R.drawable.ic_settings, R.string.cc_tile_system_settings, TileKind.SYSTEM_SETTINGS);
+        // 顺序按 K 2026-10-26 指定：桌面设置 → 系统设置 → 壁纸与屏保 → 内存清理 → 检查更新 → 关于
         addTile(0, row1, R.drawable.ic_home_settings, R.string.cc_tile_settings, TileKind.LAUNCHER_SETTINGS);
-        addTile(0, row1, R.drawable.ic_clean, R.string.cc_tile_clean, TileKind.CLEAN);
+        addTile(0, row1, R.drawable.ic_settings, R.string.cc_tile_system_settings, TileKind.SYSTEM_SETTINGS);
+        addTile(0, row1, R.drawable.ic_screensaver, R.string.cc_tile_personalize, TileKind.PERSONALIZE);
 
-        addTile(1, row2, R.drawable.ic_screensaver, R.string.cc_tile_personalize, TileKind.PERSONALIZE);
+        addTile(1, row2, R.drawable.ic_clean, R.string.cc_tile_clean, TileKind.CLEAN);
         addTile(1, row2, R.drawable.ic_refresh, R.string.cc_tile_update, TileKind.CHECK_UPDATE);
         addTile(1, row2, R.drawable.ic_info, R.string.cc_tile_about, TileKind.ABOUT);
 
@@ -254,20 +255,8 @@ public final class QuickSettingsActivity extends Activity {
 
     // ---- 底部状态 -------------------------------------------------------------------------------
 
+    /** 底部只显示版本号；桌面守护状态不再出现在控制中心（K 2026-10-26）。 */
     private void refreshStatus() {
-        View dot = findViewById(R.id.ccGuardDot);
-        TextView text = findViewById(R.id.ccGuardText);
-        boolean guarded = HomeGuardService.isRunning();
-        if (dot != null) {
-            GradientDrawable d = new GradientDrawable();
-            d.setShape(GradientDrawable.OVAL);
-            d.setColor(guarded ? 0xFF4ADE80 : 0xFFFB923C);
-            dot.setBackground(d);
-        }
-        if (text != null) {
-            text.setText(guarded ? R.string.cc_guard_on : R.string.cc_guard_off);
-            text.setTextColor(guarded ? 0x99FFFFFF : 0xFFFB923C);
-        }
         TextView version = findViewById(R.id.ccVersion);
         if (version != null) {
             try {

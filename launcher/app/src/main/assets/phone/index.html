@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101419">
+<title>GlassTV 设置</title>
+<style>
+  :root{
+    --bg:#0d1117; --card:#161b22; --line:#232a33; --text:#e6edf3; --dim:#8b98a5;
+    --accent:#4ade80; --accent-dim:#17361f;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text)}
+  body{font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans CJK SC",sans-serif;
+       padding:16px 16px calc(28px + env(safe-area-inset-bottom))}
+  h1{font-size:19px;margin:4px 0 2px}
+  .sub{color:var(--dim);font-size:13px;margin-bottom:16px}
+  section{background:var(--card);border:1px solid var(--line);border-radius:14px;
+          padding:14px 14px 6px;margin-bottom:12px}
+  h2{font-size:14px;font-weight:600;color:var(--dim);margin:0 0 10px;letter-spacing:.02em}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:10px;
+       padding:10px 0;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:0}
+  .row .label{font-size:15px}
+  .row .hint{font-size:12px;color:var(--dim);margin-top:2px}
+  input[type=text]{flex:1;min-width:0;background:#0d1117;border:1px solid var(--line);
+      border-radius:9px;color:var(--text);padding:9px 11px;font-size:15px}
+  input[type=text]:focus{outline:none;border-color:var(--accent)}
+  button{font:inherit;border:0;border-radius:9px;padding:9px 14px;background:#21262d;
+         color:var(--text);font-weight:500}
+  button:active{transform:scale(.97)}
+  button.primary{background:var(--accent);color:#06210f;font-weight:600}
+  .seg{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .seg button{padding:7px 12px;font-size:13px;border:1px solid var(--line);background:transparent;color:var(--dim)}
+  .seg button.on{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 12px}
+  .wp{position:relative;border-radius:10px;overflow:hidden;border:2px solid transparent;background:#0d1117;
+      aspect-ratio:16/9}
+  .wp img{width:100%;height:100%;object-fit:cover;display:block}
+  .wp span{position:absolute;left:0;right:0;bottom:0;font-size:10px;padding:3px 5px;
+      background:linear-gradient(transparent,rgba(0,0,0,.82));color:#dfe7ef;white-space:nowrap;
+      overflow:hidden;text-overflow:ellipsis}
+  .wp.on{border-color:var(--accent)}
+  .wp.on::after{content:"✓";position:absolute;top:4px;right:5px;background:var(--accent);color:#06210f;
+      font-size:11px;font-weight:700;border-radius:999px;padding:0 5px}
+  #toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);opacity:0;
+      background:#21262d;border:1px solid var(--line);color:var(--text);padding:10px 18px;
+      border-radius:11px;font-size:14px;transition:.22s;pointer-events:none;max-width:88vw;text-align:center}
+  #toast.show{opacity:1;transform:translate(-50%,0)}
+  #toast.err{border-color:#7f1d1d;color:#fca5a5}
+  .foot{color:var(--dim);font-size:12px;text-align:center;margin-top:14px}
+</style>
+</head>
+<body>
+
+<h1>GlassTV 设置</h1>
+<div class="sub">改完立刻生效，电视那边不用再操作</div>
+
+<section>
+  <h2>天气城市</h2>
+  <div class="row">
+    <div style="flex:1">
+      <div class="label">城市</div>
+      <div class="hint" id="cityHint">留空 = 自动定位</div>
+    </div>
+  </div>
+  <div class="row">
+    <input id="city" type="text" placeholder="例如 宜昌" autocomplete="off" enterkeyhint="done">
+    <button class="primary" id="citySave">保存</button>
+  </div>
+</section>
+
+<section>
+  <h2>壁纸</h2>
+  <div class="grid" id="wallpapers"></div>
+  <div class="row">
+    <div class="label">自动轮播</div>
+    <div class="seg">
+      <button data-rotate="1">开</button>
+      <button data-rotate="0">关</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>布局</h2>
+  <div class="row">
+    <div class="label">每行应用数量</div>
+    <div class="seg" id="columns"></div>
+  </div>
+  <div class="row">
+    <div class="label">应用栏下方保留行数</div>
+    <div class="seg" id="rows"></div>
+  </div>
+  <div class="row">
+    <div class="label">时间与天气字号</div>
+    <div class="seg" id="headerSize"></div>
+  </div>
+  <div class="row">
+    <div class="label">时间位置</div>
+    <div class="seg" id="headerAlign"></div>
+  </div>
+  <div class="row">
+    <div class="label">显示天气</div>
+    <div class="seg" id="showWeather"></div>
+  </div>
+</section>
+
+<section>
+  <h2>屏保</h2>
+  <div class="row">
+    <div class="label">屏保开关</div>
+    <div class="seg" id="saverOn"></div>
+  </div>
+  <div class="row">
+    <div class="label">样式</div>
+    <div class="seg" id="saverStyle"></div>
+  </div>
+  <div class="row">
+    <div class="label">翻页牌大小</div>
+    <div class="seg" id="flipSize"></div>
+  </div>
+  <div class="row">
+    <div class="label">必应每日换图间隔</div>
+    <div class="seg" id="saverInterval"></div>
+  </div>
+</section>
+
+<div class="foot">改完可以直接关掉这个页面，电视会保留设置</div>
+<div id="toast"></div>
+
+<script>
+(function () {
+  var TOKEN = location.pathname.split('/')[1] || '';
+  var state = null;
+
+  function $(id) { return document.getElementById(id); }
+
+  var toastTimer;
+  function toast(text, isError) {
+    var el = $('toast');
+    el.textContent = text;
+    el.className = 'show' + (isError ? ' err' : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.className = ''; }, 2200);
+  }
+
+  function post(action, payload) {
+    return fetch('/' + TOKEN + '/api/' + action, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload || {})
+    }).then(function (r) { return r.json(); }).then(function (json) {
+      if (!json.ok) throw new Error(json.error || '保存失败');
+      return json;
+    });
+  }
+
+  function save(action, payload, done) {
+    post(action, payload).then(function () {
+      if (done) done();
+      toast('已保存');
+    }).catch(function (e) {
+      toast(e.message, true);
+    });
+  }
+
+  // ---- 分段控件：一个容器里几个按钮，选中加 .on ----------------------------------
+  function segment(container, options, current, onPick) {
+    container.innerHTML = '';
+    options.forEach(function (opt) {
+      var b = document.createElement('button');
+      b.textContent = opt.text;
+      if (String(opt.value) === String(current)) b.className = 'on';
+      b.onclick = function () { onPick(opt.value); };
+      container.appendChild(b);
+    });
+  }
+
+  function mark(container, value) {
+    Array.prototype.forEach.call(container.children, function (b, i) {
+      b.className = (String(b.dataset.value) === String(value)) ? 'on' : '';
+    });
+  }
+
+  // ---- 壁纸 -------------------------------------------------------------------
+  function renderWallpapers() {
+    var box = $('wallpapers');
+    box.innerHTML = '';
+    var items = state.wallpapers.slice();
+    // 默认壁纸放第一格：它有名字没图，用纯色块表示
+    var cells = [{ i: -1, name: '默认壁纸' }].concat(items);
+    if (!state.wallpapersLite) cells.push({ i: -2, name: '必应每日' });
+    cells.forEach(function (item) {
+      var d = document.createElement('div');
+      d.className = 'wp' +
+        ((item.i === -1 && state.wallpaperDefault) ? ' on' :
+         (item.i === -2 && state.wallpaperBing) ? ' on' :
+         (item.i >= 0 && !state.wallpaperDefault && !state.wallpaperBing &&
+          item.i === state.wallpaperIndex) ? ' on' : '');
+      var img;
+      if (item.i >= 0) {
+        img = document.createElement('img');
+        img.src = '/' + TOKEN + '/thumb/' + item.i;
+        img.loading = 'lazy';
+        img.alt = item.name;
+        d.appendChild(img);
+      } else {
+        d.style.background = item.i === -1
+          ? 'repeating-linear-gradient(45deg,#1a2029,#1a2029 6px,#141922 6px,#141922 12px)'
+          : 'linear-gradient(135deg,#1b3a2a,#0d1117)';
+      }
+      var cap = document.createElement('span');
+      cap.textContent = item.name;
+      d.appendChild(cap);
+      d.onclick = function () {
+        var value = item.i === -1 ? 'default' : item.i === -2 ? 'bing' : String(item.i);
+        save('wallpaper', { value: value }, function () {
+          state.wallpaperDefault = item.i === -1;
+          state.wallpaperBing = item.i === -2;
+          if (item.i >= 0) state.wallpaperIndex = item.i;
+          renderWallpapers();
+        });
+      };
+      box.appendChild(d);
+    });
+  }
+
+  // ---- 初始化 ------------------------------------------------------------------
+  function render() {
+    $('city').value = state.city || '';
+    $('cityHint').textContent = state.autoCity
+      ? ('留空 = 自动定位（电视现在定位到：' + state.autoCity + '）')
+      : '留空 = 自动定位';
+
+    renderWallpapers();
+
+    segment($('columns'), [4, 5, 6, 7].map(function (n) {
+      return { text: n + ' 个', value: n };
+    }), state.columns, function (v) {
+      save('columns', { value: +v }, function () { state.columns = +v; render(); });
+    });
+
+    segment($('rows'), [0, 1, 2, 3].map(function (n) {
+      return { text: n + ' 行', value: n };
+    }), state.rowsBelowDock, function (v) {
+      save('rows', { value: +v }, function () { state.rowsBelowDock = +v; render(); });
+    });
+
+    segment($('headerSize'), [
+      { text: '标准', value: 0 }, { text: '大', value: 1 }, { text: '特大', value: 2 }
+    ], state.headerSize, function (v) {
+      save('headerSize', { value: +v }, function () { state.headerSize = +v; render(); });
+    });
+
+    segment($('headerAlign'), [
+      { text: '左', value: 'left' }, { text: '中', value: 'center' }, { text: '右', value: 'right' }
+    ], state.headerAlign, function (v) {
+      save('headerAlign', { value: v }, function () { state.headerAlign = v; render(); });
+    });
+
+    segment($('showWeather'), [
+      { text: '显示', value: '1' }, { text: '隐藏', value: '0' }
+    ], state.showWeather ? '1' : '0', function (v) {
+      save('showWeather', { value: v === '1' }, function () {
+        state.showWeather = v === '1'; render();
+      });
+    });
+
+    segment($('saverOn'), [
+      { text: '开', value: '1' }, { text: '关', value: '0' }
+    ], state.screensaverOn ? '1' : '0', function (v) {
+      save('screensaver', { on: v === '1' }, function () {
+        state.screensaverOn = v === '1'; render();
+      });
+    });
+
+    segment($('saverStyle'), [
+      { text: '时间', value: 'clock' }, { text: '翻页时钟', value: 'flip' }, { text: '必应每日', value: 'bing' }
+    ], state.screensaverStyle, function (v) {
+      save('screensaverStyle', { value: v }, function () {
+        state.screensaverStyle = v; render();
+      });
+    });
+
+    segment($('flipSize'), [
+      { text: '小', value: 0 }, { text: '中', value: 1 }, { text: '大', value: 2 }
+    ], state.flipCardSize, function (v) {
+      save('flipCardSize', { value: +v }, function () { state.flipCardSize = +v; render(); });
+    });
+
+    segment($('saverInterval'), [
+      { text: '立即换', value: 0 }, { text: '1 小时', value: 60 }, { text: '每天', value: 1440 }
+    ], state.screensaverInterval, function (v) {
+      save('screensaverInterval', { value: +v }, function () {
+        state.screensaverInterval = +v; render();
+      });
+    });
+  }
+
+  // 轮播开关单独处理：它的 .on 状态不跟着 render() 重置
+  function renderRotate() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-rotate]'), function (b) {
+      b.className = (b.dataset.rotate === '1') === !!state.wallpaperRotating ? 'on' : '';
+    });
+  }
+
+  $('citySave').onclick = function () {
+    var v = $('city').value.trim();
+    save('city', { value: v }, function () {
+      state.city = v;
+      $('cityHint').textContent = v ? '已固定到 ' + v : '留空 = 自动定位';
+      toast(v ? ('已换到 ' + v) : '已改回自动定位');
+    });
+  };
+  $('city').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') $('citySave').click();
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-rotate]'), function (b) {
+    b.onclick = function () {
+      var on = b.dataset.rotate === '1';
+      save('wallpaper', { value: 'rotate', on: on }, function () {
+        state.wallpaperRotating = on;
+        renderRotate();
+      });
+    };
+  });
+
+  fetch('/' + TOKEN + '/api/state')
+    .then(function (r) { return r.json(); })
+    .then(function (json) {
+      state = json;
+      state.wallpapersLite = false;
+      render();
+      renderRotate();
+    })
+    .catch(function () {
+      toast('连不上电视，确认手机和电视在同一个 Wi-Fi', true);
+    });
+})();
+</script>
+</body>
+</html>

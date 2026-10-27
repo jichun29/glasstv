@@ -14,8 +14,8 @@ android {
         minSdk (lite ? 19 : 21)
         multiDexEnabled true
         targetSdk 34
-        versionCode 67
-        versionName lite ? '4.0.6-lite' : '4.0.6'
+        versionCode 68
+        versionName lite ? '4.0.7-lite' : '4.0.7'
     }
 
     signingConfigs {
@@ -72,7 +72,9 @@ android {
 dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.3.2'
     implementation 'androidx.dynamicanimation:dynamicanimation:1.0.0'
-    // 快传页的二维码（纯 Java 生成，无网络、无 Google 依赖）
+    // 手机扫码改设置页的二维码：zxing core 以 jar 放在 launcher/libs（不走 maven，避免构建时拉网）。
+    // 只用到 qrcode/ 和 common/reedsolomon/ 两组类，R8 会把其余格式（PDF417/DataMatrix 等）全部裁掉。
+    implementation files('../libs/core-3.5.3.jar')
     // Test only (never in the APK): plain JVM tests for the module card validators, src/test.
     testImplementation 'junit:junit:4.13.2'
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'

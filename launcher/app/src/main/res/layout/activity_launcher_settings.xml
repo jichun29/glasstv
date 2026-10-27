@@ -115,9 +115,9 @@
                     </LinearLayout>
                 </LinearLayout>
 
-                <LinearLayout style="@style/SettingsRowV2" android:layout_marginTop="10dp">
-                    <TextView style="@style/SettingsRowLabel" android:text="天气城市" />
-                    <TextView android:id="@+id/weatherCityValue" style="@style/SettingsRowValue" android:text="自动定位" />
+                <LinearLayout style="@style/SettingsRowV2" android:id="@+id/weatherCityChoice" android:layout_marginTop="10dp">
+                    <TextView style="@style/SettingsRowLabel" android:text="@string/weather_city_title" />
+                    <TextView android:id="@+id/weatherCityValue" style="@style/SettingsRowValue" android:text="@string/weather_city_auto" />
                 </LinearLayout>
 
                 <LinearLayout style="@style/SettingsCard">
@@ -205,6 +205,30 @@
 
                 <LinearLayout style="@style/SettingsRowV2" android:id="@+id/tvSettingsChoice" android:layout_marginTop="10dp">
                     <TextView style="@style/SettingsRowLabel" android:text="@string/settings_tv_settings" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="›"
+                        android:textColor="#66FFFFFF"
+                        android:textSize="22sp" />
+                </LinearLayout>
+
+                <!-- 手机扫码改设置（2026-10-26）：放在「系统」最后一行，控制中心的 6 枚不动 -->
+                <LinearLayout style="@style/SettingsRowV2" android:id="@+id/phoneSetupChoice" android:layout_marginTop="10dp">
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView style="@style/SettingsRowLabel" android:text="@string/phone_setup_entry" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/phone_setup_entry_hint"
+                            android:textColor="#66FFFFFF"
+                            android:textSize="13sp" />
+                    </LinearLayout>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

@@ -198,10 +198,13 @@ public final class LauncherSettingsActivity extends Activity {
             refresh();
         });
 
-        // ===== 天气城市：只读展示自动定位结果（K 2026-10-26：不想手打城市名，定位出来就行）=====
+        // ===== 天气城市：点开可改，空 = 自动定位（2026-10-26 修：原来是只读，config 又写死宜昌，
+        // 导致所有人天气都被钉在一个城市上，且用户无从修改）=====
         weatherCityValue = findViewById(R.id.weatherCityValue);
+        View weatherCityChoice = findViewById(R.id.weatherCityChoice);
         String tvCity = Config.weatherCityOverride(this);
         weatherCity = tvCity != null ? tvCity : config.weatherCity;
+        if (weatherCityChoice != null) weatherCityChoice.setOnClickListener(v -> showWeatherCityDialog());
 
         // ===== 背景颜色（壁纸关掉/缺图时才看得见） =====
         backgroundColor = Config.load(this).backgroundColor;
@@ -312,6 +315,9 @@ public final class LauncherSettingsActivity extends Activity {
                 Toast.makeText(this, R.string.not_available, Toast.LENGTH_SHORT).show();
             }
         });
+        // 用手机改设置（2026-10-26）：遥控器填字太难，扫码在手机上改
+        findViewById(R.id.phoneSetupChoice).setOnClickListener(v ->
+                startActivity(new Intent(this, PhoneSetupActivity.class)));
 
         refresh();
         columnChoices[Math.max(0, Math.min(columns - 4, 3))].requestFocus();
@@ -323,6 +329,13 @@ public final class LauncherSettingsActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        // 手机扫码页可能刚改过设置：回来时重读一遍，页面上显示的数值要跟实际一致。
+        columns = Config.load(this).columns;
+        rowsBelowDock = Config.load(this).rowsBelowDock;
+        headerSize = Config.headerSize(this);
+        headerAlign = Config.headerAlign(this);
+        weatherCity = Config.weatherCityOverride(this);
+        refresh();
         if (preview != null) preview.refresh();
     }
 
@@ -389,9 +402,16 @@ public final class LauncherSettingsActivity extends Activity {
             dockOnlyValue.setTextColor(dockOnly ? 0xFF4ADE80 : 0x66FFFFFF);
         }
         if (weatherCityValue != null) {
-            // 只读：显示自动定位到的城市名（定位失败时退回「自动定位」）
-            String auto = Weather.place();
-            weatherCityValue.setText(auto != null && auto.length() > 0 ? auto : "自动定位");
+            // 手填过就显示手填的城市；没填过显示自动定位到的城市，定位失败才显示「自动定位」。
+            String manual = weatherCity == null ? "" : weatherCity.trim();
+            if (!manual.isEmpty()) {
+                weatherCityValue.setText(manual);
+            } else {
+                String auto = Weather.place();
+                weatherCityValue.setText(auto != null && auto.length() > 0
+                        ? auto : getString(R.string.weather_city_auto));
+            }
+            weatherCityValue.setTextColor(!manual.isEmpty() ? 0xFF4ADE80 : 0x66FFFFFF);
         }
         // 开关：只更新右侧的「开/关」值，行标签留在 XML 里
         animationsValue.setText(animations ? R.string.on : R.string.off);
@@ -414,6 +434,48 @@ public final class LauncherSettingsActivity extends Activity {
 
         // 任何一项改动都会走到这里，预览跟着重画（实时反馈）
         if (preview != null) preview.refresh();
+    }
+
+    /**
+     * 天气城市：电视端手填（2026-10-26 修）。
+     *
+     * 只用遥控器也能填：弹一个带输入框的对话框，填中文城市名保存，清空 = 回到自动定位。
+     * 保存后必须 forceRefresh —— Weather 有 3 小时节流，不清缓存就会继续显示旧城市的读数。
+     */
+    private void showWeatherCityDialog() {
+        final android.widget.EditText input = new android.widget.EditText(this);
+        input.setSingleLine(true);
+        input.setHint(R.string.weather_city_hint);
+        input.setText(weatherCity == null ? "" : weatherCity);
+        input.setSelection(input.getText().length());
+        int pad = (int) (24 * getResources().getDisplayMetrics().density);
+        input.setPadding(pad, pad / 2, pad, pad / 2);
+
+        new android.app.AlertDialog.Builder(this)
+                .setTitle(R.string.weather_city_title)
+                .setView(input)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    String city = input.getText().toString().trim();
+                    if (city.isEmpty()) choices.edit().remove(Config.WEATHER_CITY_KEY).apply();
+                    else choices.edit().putString(Config.WEATHER_CITY_KEY, city).apply();
+                    weatherCity = city;
+                    Weather.forceRefresh(this);
+                    setResult(RESULT_OK);
+                    refresh();
+                    Toast.makeText(this,
+                            city.isEmpty() ? getString(R.string.weather_city_auto)
+                                    : getString(R.string.weather_city_saved, city),
+                            Toast.LENGTH_SHORT).show();
+                })
+                .setNeutralButton(R.string.weather_city_clear, (dialog, which) -> {
+                    choices.edit().remove(Config.WEATHER_CITY_KEY).apply();
+                    weatherCity = "";
+                    Weather.forceRefresh(this);
+                    setResult(RESULT_OK);
+                    refresh();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     private boolean hasOnTvChoices() {

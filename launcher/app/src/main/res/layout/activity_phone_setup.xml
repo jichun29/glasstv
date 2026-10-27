@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 手机扫码改设置（2026-10-26）：电视端就这一屏，左边二维码、右边说明。
+     布局尺寸按 960dp 宽的安全区写（电视屏宽 960dp = 1920px ÷ 2.0），左右各留 88dp。 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FF101419"
+    android:orientation="horizontal"
+    android:paddingStart="88dp"
+    android:paddingEnd="88dp"
+    android:paddingTop="48dp"
+    android:paddingBottom="48dp">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/phone_setup_title"
+            android:textColor="#FFFFFFFF"
+            android:textSize="32sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/phoneHint"
+            android:layout_width="280dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/phone_setup_hint"
+            android:textColor="#99FFFFFF"
+            android:textSize="16sp" />
+
+        <FrameLayout
+            android:layout_width="320dp"
+            android:layout_height="320dp"
+            android:layout_marginTop="24dp"
+            android:background="#FFFFFFFF"
+            android:padding="16dp">
+
+            <ImageView
+                android:id="@+id/phoneQr"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/phone_setup_title"
+                android:scaleType="fitCenter" />
+
+            <TextView
+                android:id="@+id/phoneQrFallback"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textColor="#FF101419"
+                android:textSize="16sp"
+                android:visibility="gone" />
+        </FrameLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="56dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/phone_setup_steps"
+            android:lineSpacingExtra="8dp"
+            android:textColor="#CCFFFFFF"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/phoneUrl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:textColor="#FF4ADE80"
+            android:textSize="18sp"
+            android:textIsSelectable="true" />
+
+        <TextView
+            android:id="@+id/phoneStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textColor="#99FFFFFF"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/phoneClose"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginTop="28dp"
+            android:background="@drawable/pill_bg"
+            android:gravity="center"
+            android:paddingStart="28dp"
+            android:paddingEnd="28dp"
+            android:text="@string/phone_setup_close"
+            android:textColor="#FFFFFFFF"
+            android:textSize="17sp" />
+    </LinearLayout>
+</LinearLayout>

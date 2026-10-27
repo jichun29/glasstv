@@ -2724,7 +2724,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener, T
         if (Build.VERSION.SDK_INT < 21) {
             if (!sourcePanelService.isEmpty()) openSourcePanel();
             else if (liveTvIntent() != null) open(liveTvIntent());
-            else Toast.makeText(this, R.string.not_available, Toast.LENGTH_SHORT).show();
+            else if (!TvSettings.openSourcePanel(this)) {
+                Toast.makeText(this, R.string.no_inputs, Toast.LENGTH_SHORT).show();
+            }
             return;
         }
         View anchor = findViewById(R.id.btnInputs);
@@ -2852,7 +2854,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener, T
             addInputRow(rows, popup, R.drawable.ic_livetv, getString(R.string.live_tv), -1, () -> open(liveTvIntent));
         }
         if (rows.getChildCount() == 0) {
-            Toast.makeText(this, R.string.no_inputs, Toast.LENGTH_SHORT).show();
+            popup.dismiss();
+            // TvInputManager 一个源都不报（雷鸟/TCL 这类固件把选源做在自己那套里）：
+            // 先试运行期自找到的厂商选源面板，再退到「让用户自己挑」的列表。
+            if (!TvSettings.openSourcePanel(this)) {
+                Toast.makeText(this, R.string.no_inputs, Toast.LENGTH_SHORT).show();
+            }
             return;
         }
 

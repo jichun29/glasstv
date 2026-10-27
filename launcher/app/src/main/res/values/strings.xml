@@ -39,6 +39,19 @@
     <string name="offline">Offline</string>
     <string name="not_available">Not available on this TV</string>
     <string name="cant_open">Can\'t open %1$s</string>
+    <string name="weather_city_title">Weather city</string>
+    <string name="weather_city_hint">Chinese city name, e.g. Yichang</string>
+    <string name="weather_city_auto">Automatic</string>
+    <string name="weather_city_saved">Now showing %1$s</string>
+    <string name="weather_city_clear">Back to automatic</string>
+    <string name="phone_setup_title">Set up from your phone</string>
+    <string name="phone_setup_hint">Scan the code to change the weather city, wallpaper, layout and screensaver from your phone.</string>
+    <string name="phone_setup_steps">1. Put your phone on the same Wi-Fi as the TV\n2. Scan the code on the left\n3. Changes apply straight away</string>
+    <string name="phone_setup_close">Close</string>
+    <string name="phone_setup_no_network">The TV is not on a local network (or only a proxy tunnel), so a phone cannot reach it. Connect the TV to the same Wi-Fi first.</string>
+    <string name="phone_setup_applied">Changed from the phone</string>
+    <string name="phone_setup_entry">Set up from your phone</string>
+    <string name="phone_setup_entry_hint">Typing with the remote is painful; scan and use your phone</string>
     <string name="date_format">EEEE  d MMMM</string>
     <!-- Date next to the clock on Home; a locale can split it over two lines with \n. -->
     <string name="date_format_home" translatable="false">@string/date_format</string>

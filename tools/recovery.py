@@ -30,7 +30,7 @@ SCALE_RE = re.compile(r"-?\d+(\.\d+)?")
 SETTINGS = ("window_animation_scale", "transition_animation_scale", "animator_duration_scale")
 # This project's own launcher. When it already owned Home before debloating, restoring Home to it
 # would leave the stock launcher off, so restore goes back to the stock one instead.
-CUSTOM_LAUNCHER = "com.gathin.tvhome"
+CUSTOM_LAUNCHER = "com.glasstv.tvhome"
 VERSION = 1
 
 

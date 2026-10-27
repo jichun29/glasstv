@@ -1,136 +1,87 @@
-# The prompt
+# 装 GlassTV 的指令词（给 AI 助手用）
 
-Paste this into Claude Code (or another coding assistant with shell access) on a computer that is
-on the same Wi-Fi as the TV. Works on Android TV / Google TV sets (Xiaomi, TCL, Hisense, Sony,
-OnePlus, Realme, Nvidia Shield and most others). It will not work on Samsung Tizen, LG webOS or
-Fire TV. If you cloned this repo, mention that: the assistant can reuse `tools/` and `launcher/`
-instead of writing them from scratch, and only needs to edit `launcher/.../values/config.xml`.
+把下面整段复制给你电脑上的 AI 助手（Claude Code / Codex / Trae / 豆包电脑版等）。
+它需要能在这台电脑上执行命令，电脑和电视连同一个 Wi-Fi。
 
-Before you start, on the TV: Settings → Device Preferences → About → press OK on "Build" 7 times,
-then go back → Developer options → turn on USB debugging (and Network/ADB debugging if your TV
-shows it). Keep the TV on. Some boxes cut power to their USB port while USB debugging is on, so a
-USB speaker or drive plugged into it goes dead until you switch debugging off again.
+支持 Android TV / Google TV（小米、TCL、海信、索尼、创维、长虹、极米、Nvidia Shield 等）。
+三星 Tizen、LG webOS、Fire TV 装不了，不用试。
 
----
-
-I want to debloat my Android TV and replace its launcher with a clean Apple TV style home screen.
-My TV model is: <MODEL NAME HERE>. Work on the real device, step by step, and verify everything you
-do with screenshots pulled from the TV. Ask me before anything that depends on my preferences.
-
-Connect
-- Find the TV on my network (hostname, ARP table, or ask me for the IP) and connect over ADB on port 5555.
-  If the TV is in another home, I'll give you its Tailscale address instead (docs/REMOTE.md): use that,
-  don't scan my local network.
-- If the stock adb binary fails with "No route to host" on macOS even though the port is open, that is
-  macOS Local Network privacy blocking adb. Don't debug it: use the Python `adb-shell` package in a venv
-  as the ADB client instead. If its file push hangs on larger files, transfer files as base64 chunks
-  through the shell and verify the md5.
-- If port 5555 stays closed, the TV may only offer Wireless debugging (Google TV sets often do): look for
-  `_adb-tls-connect._tcp` with `dns-sd -B` or `adb mdns services`, ask me for the code and port under
-  Developer options > Wireless debugging > Pair device with pairing code, then `adb pair`, `adb connect`
-  and `adb tcpip 5555`. Android switches Wireless debugging off whenever Wi-Fi drops.
-- Tell me when the "Allow USB debugging?" prompt will appear on the TV so I can accept it.
-- If `adb install` hangs on Android 14 it is waiting for an on-screen confirmation; push the APK and run
-  `pm install -r` over the shell instead.
-
-Back up first
-- Save the full package list, disabled-package list, getprop output and all settings to a backup folder
-  before changing anything, and write a restore script that re-enables everything you disable.
-- Ask me what is plugged into the TV's USB ports. Some devices cut their power while USB debugging
-  is on, so warn me, and remind me to switch debugging off once you're done.
-- When you finish, close network ADB instead of leaving it open: switch USB debugging and
-  Network/ADB debugging off on the TV, revoke the USB debugging authorisations, reboot, and check
-  with `tools/adb-closed.py <tv ip>` that the port refuses the connection. Don't trust `nc` on macOS:
-  Local Network privacy can block it too, and its "No route to host" proves nothing; only "Connection
-  refused" does. Port 5555 is plaintext, and on firmware with `ro.adb.secure=0` any device on the LAN
-  can get a shell.
-
-Debloat
-- List installed packages and sort them into: manufacturer telemetry/analytics, manufacturer content
-  and ad services (PatchWall, recommendation rows, content providers), background services I probably
-  don't need (share/cast duplicates, cleaners), preloaded apps, and streaming apps.
-- Disable the first categories with `pm disable-user --user 0`, never uninstall system packages.
-- Never disable what the TV needs to work: the TV app and input services that play HDMI and the
-  tuner, the input/source menu, remote control and Bluetooth pairing services, the on-screen
-  keyboard, Google Play Store and Play Services. Manufacturer package names often don't say what a
-  package does: check its activities and services with `dumpsys package` first, and ask me if it's
-  still unclear.
-- Before touching streaming apps, voice assistant, Chromecast, Miracast or the update service, ask me
-  which ones I use with a checklist question and disable only what I don't tick.
-- Run `pm` commands one per shell call, chained commands may silently stop after the first.
-- Don't launch a package whose name says factory, production, AT or fac menu (`com.cvte.tv.hkcfac`,
-  `com.at.factory.*`, `mediatek.factorymenu.ui` and the like) to see what it does, even read-only:
-  on Haier/CVTE boards opening one flips a factory-mode flag that kills the Input key and CEC, and
-  makes the next boot disable Play services, Netflix and Chromecast - which the shell then cannot
-  re-enable. `dumpsys package <name>` tells you what a package is without starting it, and
-  `docs/TROUBLESHOOTING.md` has the way out if one has been opened.
-- Disable in small batches and screenshot between them: a batch can take something load-bearing with
-  it and you cannot tell which.
-- After the last batch, reboot once and compare `pm list packages -d` with what you disabled: some
-  firmware re-enables packages at every boot from its own list (TCL Android 9 does this for its user
-  center). Note those in the list header instead of disabling them again after each boot.
-- Offer me ad-blocking DNS as an optional extra: on Android 9 and newer, Private DNS set to an
-  ad-blocking resolver (`settings put global private_dns_specifier dns.adguard-dns.com`, then
-  `settings put global private_dns_mode hostname`). Tell me it doesn't block YouTube ads, check an app
-  still plays afterwards, and note the undo (`private_dns_mode opportunistic`) in the README.
-
-Launcher
-- Check that the TV accepts APKs before building anything. Some China-market sets answer every
-  sideload with `INSTALL_FAILED_VERIFICATION_FAILURE` — `adb install`, `pm install`, a hand-started
-  installer and even the manufacturer's own APKs all fail — and others refuse any package that
-  declares `android.intent.category.HOME` unless it carries the manufacturer's signature. If you
-  hit either, do the debloat half, say plainly that the launcher half is impossible here, and stop
-  retrying installs. The matching `examples/` header says which case your TV is.
-- Don't install a third-party launcher that charges for basics like wallpapers. Build a small native
-  Android TV launcher instead (Java, AndroidX RecyclerView, minSdk matching the TV, debug build is fine),
-  install it over ADB, set it as the default home and disable the stock launcher. If several apps claim
-  the HOME intent, list them with `cmd package query-activities -a android.intent.action.MAIN -c
-  android.intent.category.HOME` and set the default with `cmd package set-home-activity`. Those two
-  commands can both name your launcher while Home still opens something else: on some Google TV builds
-  `set-home-activity` prints `Success` and changes nothing, and setupwraith's `.RecoveryActivity`
-  keeps the key. Confirm with `dumpsys activity activities | grep mFocusedApp` before telling me the
-  takeover worked.
-- Before disabling the stock launcher, check which other apps claim HOME: on Google TV the setup wizard
-  (`com.google.android.tungsten.setupwraith`) takes over even after the stock launcher is disabled, and
-  the matching `examples/` header says what to do. Before disabling setupwraith, run
-  `dumpsys wifi | grep -o 'cname=[^ ]*'`: a Wi-Fi network saved during first setup belongs to it, and
-  Android deletes that network the moment it is disabled, which takes the TV off Wi-Fi and ADB. If it
-  does, ask me to forget the network and re-join it in Settings first.
-- On Google TV the stock launcher also answers the remote's app buttons (Netflix, YouTube and the like),
-  Input and Settings/dashboard buttons, so after disabling it ask me to press each one, and remap any that
-  do nothing with the launcher's key services: `input_key_keycodes` and `app_keys` with
-  INPUT_KEY_SERVICE=1, `settings_key_keycodes` with HOME_KEY_SERVICE=1 (`config.xml` or the theme).
-  A button the TV logs as `KEY_UNKNOWN` or `KEY_PROGRAM` cannot be matched by keycode, since every
-  unmapped button shares it: read the scancode with `getevent -lt` and use `settings_key_scancodes`,
-  which only `config.xml` carries (a theme can set keycodes, not scancodes).
-- On Android 11 and newer the launcher must declare `<queries>` for `android.intent.category.LEANBACK_LAUNCHER`,
-  or package visibility silently hides every app and the grid comes up empty; target a recent SDK, some
-  Google TV 14 sets refuse older targets at install.
-- Design, Apple TV 4K style: pitch black background; a dock row at the bottom of the screen inside a
-  slightly lighter rounded band holding the four apps I pick (ask me which, and the order); the rest of
-  the apps in a 4-column grid below that scrolls up when I press Down; one translucent "glass" highlight
-  that springs from tile to tile instead of per-tile borders; the focused tile scales up slightly and
-  shows its name underneath; above the dock, the focused dock app's name in large light type with an
-  ambient glow in a colour sampled from its banner; frosted pill buttons top right for Inputs, Wi-Fi
-  (showing the network name) and Settings; a greeting, a large thin clock and the date top left in a
-  downloaded open-licence typeface such as Outfit. Inputs opens a compact glass dropdown under the pill
-  listing the HDMI ports, AV and Live TV, switching via the TV input framework.
-- Make D-pad navigation deterministic: Up/Down move exactly one row, Up from the dock goes to the top
-  bar, the ends of the top bar don't fall through to tiles. Remember the last focused tile.
-- Keep it light: the TV has about 1 GB of RAM. No blur, no video, no network polling.
-
-Verify
-- After each change, inject remote key presses over ADB, take a screenshot from the TV and look at it.
-  Fix what you see before moving on.
-- Live TV and HDMI screenshots come back empty (0 bytes); that is the TV, not a broken debloat. Check
-  `dumpsys activity activities | grep topResumedActivity` instead (see `docs/TROUBLESHOOTING.md`).
-- If a remote button relies on an accessibility helper, check that the service is enabled and bound
-  for the current user, then ask me to press the real button; an injected key is not proof (see
-  `docs/TROUBLESHOOTING.md`).
-- When done, give me a restore script, a build-and-install script, and a README that explains how to
-  re-enable any app and how to change the dock order or the wallpaper.
+开始前在电视上打开 ADB 调试：小米是「设置 → 账号与安全 → ADB 调试」（同一页把「安装未知来源的应用」也打开）；
+原生 Android TV / Google TV 是「关于 → 连按版本号 7 次 → 开发者选项 → USB 调试」。
+更全的品牌路径见 [docs/tv-adb-guide.md](docs/tv-adb-guide.md)。
 
 ---
 
-Expect to answer three or four checklist questions (which apps you use, which four go in the dock,
-whether to keep the voice assistant, Chromecast and firmware updates). Everything is reversible.
+## 复制这一段
+
+```text
+请帮我把 GlassTV 装到我的电视上，并设成默认桌面。仓库地址：https://github.com/jichun29/glasstv
+
+硬性要求，请务必遵守：
+1. 只下载 Release 里现成的 APK 安装，不要 clone 仓库、不要自己编译、不要自己写桌面、不要改包名、不要重新签名。
+2. 只做三件事：装 APK、设为默认桌面、验证。不要停用/卸载电视上的任何系统应用（不要做 debloat）。
+3. 每一步都在我的电脑上真的执行命令，不要只把步骤告诉我。需要我在电视上点确认时，提前告诉我。
+4. 装完把验证命令的原始输出贴给我：版本号、当前默认桌面、按 Home 之后前台是哪个应用。
+5. 哪一步失败就把完整报错贴给我，不要自己猜替代方案、不要换别的 APK 或别的桌面软件。
+
+我的电视型号是：____
+电视的 IP 是：____（不知道就用 adb 扫一遍局域网 5555 端口，或问我）
+
+做法：
+1. 电视上先打开 ADB 调试，然后 adb connect <电视IP>:5555，第一次会弹「允许 USB 调试」，我会点允许。
+2. 查电视的 Android 版本：adb shell getprop ro.build.version.release
+3. 按版本下载对应的包（两个包必须来自 Releases，不要用别处的 APK）：
+   - Android 5.0 及以上：GlassTV-Launcher-universal.apk
+   - Android 4.4：GlassTV-Launcher-lite44.apk
+   下载地址（把文件名换掉即可）：
+   https://github.com/jichun29/glasstv/releases/latest/download/GlassTV-Launcher-universal.apk
+   如果 github.com 直连超时，换成 https://ghfast.top/<原来的完整地址> 再试。
+   下完先核对文件大小和 Release 页面上写的一致，并且是 zip 格式（file 或 unzip -l 能打开）；
+   大小不对或打不开就是没下完整，删掉重下，不要硬装。
+4. 安装：adb install -r <下载的 apk>
+   再用 adb shell dumpsys package com.glasstv.tvhome | grep -m1 versionName 确认装上的版本号。
+5. 设为默认桌面：
+   adb shell am start -W -n com.glasstv.tvhome/com.glasstv.tvhome.MainActivity
+   adb shell cmd package set-home-activity --user 0 com.glasstv.tvhome/.MainActivity
+6. 验证：adb shell cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME
+   应该返回 com.glasstv.tvhome/...；然后让我按遥控器 Home 键，再跑
+   adb shell dumpsys window | grep mCurrentFocus，确认前台是 com.glasstv.tvhome。
+
+常见报错怎么读（照这个判断，不要瞎试）：
+- INSTALL_FAILED_OLDER_SDK → 电视系统太老，换成 GlassTV-Launcher-lite44.apk（支持到 Android 4.4）。
+- INSTALL_FAILED_UPDATE_INCOMPATIBLE → 电视上已经有一个同名包，但签名不同（多半是别处编的版本）。
+  先 adb shell pm uninstall com.glasstv.tvhome，再装 Release 里的包。注意这会清掉桌面排序和壁纸设置。
+- INSTALL_PARSE_FAILED_* → APK 文件不完整或被镜像换成了网页，重新下载，核对大小。
+- INSTALL_FAILED_VERIFICATION_FAILURE → 电视固件禁止侧载：去电视设置里允许「安装未知来源的应用」，
+  关掉安装校验后再试；还不行就是这台机器不允许第三方桌面，直接告诉我，不要继续折腾。
+- Error: Activity class ... does not exist → 装的包名和 com.glasstv.tvhome 不一致，确认下的是本仓库的 Release。
+
+不要做的事：
+- 不要停用电视自带的桌面（保留它，随时能按 Home 切回去）。
+- 不要为了「更干净」去停用系统应用或改私有 DNS。
+- 不要装别的第三方桌面来替代。
+```
+
+---
+
+## 装完之后（可选）：开桌面守护
+
+小米等国行固件在待机时会强杀第三方桌面，醒来露出自带桌面。装好后可以用 adb 一次性开启守护
+（这是无障碍服务，只能靠命令开，桌面里没有开关）：
+
+```bash
+adb shell settings put secure enabled_accessibility_services com.glasstv.tvhome/com.glasstv.tvhome.HomeGuardService
+adb shell settings put secure accessibility_enabled 1
+```
+
+## 还原成原来的桌面
+
+```bash
+adb shell cmd package resolve-activity -c android.intent.category.HOME -a android.intent.action.MAIN
+adb shell cmd package set-home-activity --user 0 <原桌面包名>/.<原桌面Activity>
+adb shell pm uninstall com.glasstv.tvhome
+```
+
+## 想自己装（不用 AI）
+
+见 [README 的「安装」一节](README.md#安装)：`adb install -r` 一行就够，不需要编译。

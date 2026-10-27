@@ -128,6 +128,12 @@
             android:label="屏保"
             android:exported="false"
             android:screenOrientation="landscape" />
+        <!-- 用手机改设置（2026-10-26）：局域网 HTTP 页，退出即停 -->
+        <activity
+            android:name=".PhoneSetupActivity"
+            android:label="@string/phone_setup_title"
+            android:exported="false"
+            android:screenOrientation="landscape" />
         <activity
             android:name=".MemoryCleanSettingsActivity"
             android:label="内存清理"

@@ -227,6 +227,8 @@
          middle of a programme. Can also be set with "home_idle_clock_minutes": 10 in a theme's config.json. -->
     <integer name="home_idle_clock_minutes">0</integer>
 
-    <!-- 天气城市（2026-10-23 K 定制）：中文城市名（如 "宜昌"）写死就不按 IP 猜了；空 = 按公网 IP 猜。 -->
-    <string name="weather_city" translatable="false">宜昌</string>
+    <!-- 天气城市：留空 = 按系统定位/公网 IP 自动识别（默认）。只有确实要固定城市时才填中文城市名，
+         例如 "宜昌"。不要再往这里写默认城市：写死等于所有用户的天气都被钉在同一个地方，
+         而设置页的「天气城市」是电视端手填入口，两者会互相打架。 -->
+    <string name="weather_city" translatable="false"></string>
 </resources>
